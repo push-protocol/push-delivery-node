@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "ts-node": {
+    "transpileOnly": true
+  },
+  "compilerOptions": {
+    "skipLibCheck": true,
+  },
+  "exclude": [
+    "node_modules", "*.ts"
+  ],
+}
