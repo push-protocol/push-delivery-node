@@ -2,19 +2,19 @@ import { Container } from 'typedi'
 
 var db = require('../../database/dbHelper')
 var crypto = require('../../helpers/cryptoHelper')
+import logger from '../../loaders/logger'
 
 const onlyAuthorized = async (req, res, next, opToValidate) => {
-    const Logger = Container.get('logger')
     const query =
         'SELECT for_wallet, secret FROM servertokens WHERE server_token=? LIMIT 1'
-    const server_token_res = async (query, server_token, logger) => {
+    const server_token_res = async (query, server_token) => {
         return new Promise((resolve, reject) => {
             db.query(query, [server_token], function (err, results) {
                 if (err) {
-                    Logger.error(err)
+                    logger.error(err)
                     return reject(err)
                 } else {
-                    Logger.info('Wallet retrieved for checking: %o', results)
+                    logger.info('Wallet retrieved for checking: %o', results)
                     return resolve({ success: 1, data: results[0] })
                 }
             })
@@ -22,20 +22,16 @@ const onlyAuthorized = async (req, res, next, opToValidate) => {
     }
 
     try {
-        const response = await server_token_res(
-            query,
-            req.body.server_token,
-            Logger
-        )
+        const response = await server_token_res(query, req.body.server_token)
 
         if (response && response.success) {
             // Check if token exists
             const data = response.data
-            Logger.debug('Checking Response')
+            logger.debug('Checking Response')
 
             if (data) {
                 const secret = data.secret
-                Logger.debug(
+                logger.debug(
                     'Secret retrieved: ' + secret + ' Decrypting op_enc ...'
                 )
 
@@ -43,7 +39,7 @@ const onlyAuthorized = async (req, res, next, opToValidate) => {
                     req.body.op_aes,
                     secret
                 )
-                Logger.debug('Decrypted Operation: [' + retrievedOP + ']')
+                logger.debug('Decrypted Operation: [' + retrievedOP + ']')
 
                 if (retrievedOP === opToValidate) {
                     req.body.device_token_decrypted = crypto.decryptWithAES(

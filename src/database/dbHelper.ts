@@ -1,4 +1,3 @@
-import { Container } from 'typedi'
 import config from '../config'
 import logger from '../loaders/logger'
 
@@ -52,7 +51,6 @@ module.exports = {
         })
     },
     query: function () {
-        const Logger = Container.get('logger')
         var sql_args = []
         var args = []
         for (var i = 0; i < arguments.length; i++) {

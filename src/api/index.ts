@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import pushtokens from './routes/pushtokens'
-import LoggerInstance from '../loaders/logger'
+import logger from '../loaders/logger'
 
 export default () => {
     const app = Router()
@@ -20,7 +20,7 @@ export default () => {
     })
 
     app.use((error, req, res, next) => {
-        LoggerInstance.error(error.message)
+        logger.error(error.message)
         res.statusCode = error.statusCode
         res.json({
             message: error.message,

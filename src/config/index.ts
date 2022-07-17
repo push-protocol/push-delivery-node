@@ -1,12 +1,9 @@
 import dotenv from 'dotenv'
 
-// import {logLevel} from '../app'
-// Set the NODE_ENV to 'development' by default
 process.env.NODE_ENV = process.env.NODE_ENV || 'development'
 
 const envFound = dotenv.config()
 if (envFound.error) {
-    // This error should crash whole process
     throw new Error("⚠️  Couldn't find .env file  ⚠️")
 }
 
@@ -16,10 +13,8 @@ export const changeLogLevel = (level: string) => {
     }
 }
 
-//get the general config
 const generalConfig = require('./config-general').default
 
-// load the appropriate config as per the server state
 let config
 console.log(process.env.DELIVERY_NODES_NET)
 if (process.env.DELIVERY_NODES_NET == 'PROD') {

@@ -10,13 +10,10 @@ const onlyLocalhost = async (req, res, next) => {
     try {
         // Check if ip is localhost and only continue
         var ip = req.connection.remoteAddress
-        var host = req.get('host')
-
         if (config.environment === 'production') {
             // Return with unauthorized error
             return res.sendStatus(401).json({ info: 'Only development config' })
         }
-
         checkLocalHost(ip)
             .then((result) => {
                 if (!result) {
