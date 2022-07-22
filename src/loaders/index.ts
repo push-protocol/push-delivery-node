@@ -3,6 +3,7 @@ import dependencyInjectorLoader from './dependencyInjector'
 import logger from './logger'
 import initializer from './initializer'
 import dbLoader from './db'
+import pushNodeListener from '../sockets/pushNodeListener'
 
 export default async ({ expressApp, server, testMode }) => {
     logger.info('✔️   Loaders connected!')
@@ -19,4 +20,7 @@ export default async ({ expressApp, server, testMode }) => {
 
     await expressLoader({ app: expressApp })
     logger.info('✔️   Express loaded!')
+
+    await pushNodeListener()
+    logger.info('✔️   PushNodeListener loaded!')
 }
