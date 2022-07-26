@@ -1,6 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express'
 import { Container } from 'typedi'
-import AuthService from '../../services/authService'
 import PushTokensService from '../../services/pushTokensService'
 import middlewares from '../middlewares'
 import { celebrate, Joi } from 'celebrate'

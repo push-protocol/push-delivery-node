@@ -26,6 +26,15 @@ export default {
     dbuser: process.env.DB_USER,
     dbpass: process.env.DB_PASS,
 
+
+    /**
+     * The push node database config .. this needs to be deleted post the migration
+     */
+    pushnode_dbhost: process.env.PUSH_NODE_DB_HOST,
+    pushnode_dbname: process.env.PUSH_NODE_DB_NAME,
+    pushnode_dbuser: process.env.PUSH_NODE_DB_USER,
+    pushnode_dbpass: process.env.PUSH_NODE_DB_PASS,
+
     staticServePath: staticServeURI,
 
     /**
