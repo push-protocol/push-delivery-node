@@ -24,13 +24,13 @@ export default ({
 
     // 1. MESSAGING SERVICE
     // Schedule payloads data population for unprocessed payloads
-    logger.info('-- 🛵 Scheduling Messaging Processing [Every 2 Mins]');
-    schedule.scheduleJob('*/2 * * * *', async function() {
+    logger.info('-- 🛵 Scheduling Messaging Processing [Every 1 Min]');
+    schedule.scheduleJob('*/1 * * * *', async function() {
         const messaging = Container.get(MessagingService);
         const taskName = 'Messages Processed';
         try {
-            // await messaging.batchProcessMessages();
-            //logger.info(`🐣 Cron Task Completed -- ${taskName}`);
+             await messaging.batchProcessMessages();
+             logger.info(`🐣 Cron Task Completed -- ${taskName}`);
         } catch (err) {
             logger.error(`❌ Cron Task Failed -- ${taskName}`);
             logger.error(`Error Object: %o`, err);
