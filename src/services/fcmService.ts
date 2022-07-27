@@ -28,19 +28,4 @@ export default class FCMService {
                 return error
             })
     }
-
-    public async sendMessageToSingleRecipient(token, payload) {
-        payload.token = token
-        return admin
-            .messaging()
-            .send(payload)
-            .then((response) => {
-                logger.info('Successfully sent message: %o', response)
-                return response
-            })
-            .catch((error) => {
-                logger.error('Error sending message: %o', error)
-                return error
-            })
-    }
 }

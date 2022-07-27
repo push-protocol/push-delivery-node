@@ -10,10 +10,8 @@ export default class PushTokensService {
         platform_decrypted: string
     ) {
         logger.debug('Registering device')
-
         const query =
             'INSERT IGNORE INTO pushtokens (wallet, device_token, platform) VALUES (?, ?, ?)'
-
         const insert_push_token = async (query, logger) => {
             return new Promise((resolve, reject) => {
                 db.query(

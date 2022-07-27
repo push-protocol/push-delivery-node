@@ -10,31 +10,47 @@ const db = require('../database/dbHelper')
 export default class PushMessageService {
     // For adding or modifying info of channel
     public async addMessage(loop_id, tokens, payload) {
-        logger.debug(
+        logger.info(
             'Adding incoming messages from feed with loop_id: ' + loop_id
         )
 
         // Need to ignore to handle the case of feeds process failing, it's a bit hacky
         const query =
-            'INSERT IGNORE INTO pushmsg (loop_id, tokens, payload) VALUES (?, ?, ?);'
+            'INSERT IGNORE INTO pushmsg_v2 (loop_id, tokens, payload) VALUES (?, ?, ?);'
 
         return await new Promise(async (resolve, reject) => {
-            db.query(
-                query,
-                [loop_id, JSON.stringify(tokens), JSON.stringify(payload)],
-                function (err, results) {
-                    if (err) {
-                        return reject(err)
-                    } else {
-                        return resolve(results)
+                db.query(
+                    query,
+                    [loop_id, JSON.stringify(tokens), JSON.stringify(payload)],
+                    function(err, results) {
+                        if (err) {
+                            return reject(err)
+                        } else {
+                            return resolve(results)
+                        }
                     }
-                }
-            )
-        })
+                )
+            })
             .then(async (response) => {
                 logger.info('✅ Completed addMessage(): %o', response)
-                this.batchProcessMessages()
-                return { success: 1, loop_id: loop_id }
+                this.processMessage(loop_id, JSON.stringify(tokens), JSON.stringify(payload))
+                    .then((response) => {
+                        logger.debug(
+                            'Completed processMessages() for loop_id: ' +
+                            loop_id
+                        )
+                    })
+                    .catch((err) => {
+                        logger.error(
+                            '🔥 Error processMessages() for loop_id: ' +
+                            loop_id,
+                            err
+                        )
+                    })
+                return {
+                    success: 1,
+                    loop_id: loop_id
+                }
             })
             .catch((err) => {
                 logger.error(err)
@@ -48,7 +64,7 @@ export default class PushMessageService {
             'Trying to batch process all messages which are not processed, 50 requests at a time'
         )
         const query =
-            'SELECT loop_id, tokens, payload FROM pushmsg WHERE processed=0 AND attempts<? ORDER BY attempts ASC, timestamp DESC LIMIT 50'
+            'SELECT loop_id, tokens, payload FROM pushmsg_v2 WHERE processed=0 AND attempts<? ORDER BY attempts ASC, timestamp DESC LIMIT 50'
         return await new Promise((resolve, reject) => {
             db.query(
                 query,
@@ -81,8 +97,6 @@ export default class PushMessageService {
                             )
                         })
                 }
-
-                // Finally return succes
                 return { success: 1 }
             })
             .catch((err) => {
@@ -91,7 +105,6 @@ export default class PushMessageService {
             })
     }
 
-    // for processing ipfshash
     public async processMessage(loop_id, tokens, payload) {
         if (config.LOCK_MESSAGING_LOOPIDS[loop_id]) {
             logger.debug(
@@ -109,9 +122,7 @@ export default class PushMessageService {
             let valid = true
             let err = ''
             let fcmResponse = {}
-
             const fcm = Container.get(FCMService)
-
             try {
                 fcmResponse = await fcm.sendMessageToMultipleRecipient(
                     JSON.parse(tokens),
@@ -152,10 +163,8 @@ export default class PushMessageService {
                         }
                     }
                 }
-            }
 
-            // Finally, populate the payload
-            if (valid) {
+                // Finally, populate the payload
                 try {
                     await this.finishProcessing(loop_id)
                     logger.info('✅ Completed processMessage()')
@@ -167,7 +176,7 @@ export default class PushMessageService {
                 }
             }
 
-            if (!valid) {
+            else {
                 // Write attempt number before erroring out
                 try {
                     await this.bumpAttemptCount(loop_id)
@@ -188,7 +197,7 @@ export default class PushMessageService {
             'Finishing Processing for processMessage of loop_id: ' + loop_id
         )
 
-        const query = 'UPDATE pushmsg SET processed=1 WHERE loop_id=?'
+        const query = 'UPDATE pushmsg_v2 SET processed=1 WHERE loop_id=?'
 
         return await new Promise((resolve, reject) => {
             db.query(query, [loop_id], function (err, results) {
@@ -214,7 +223,7 @@ export default class PushMessageService {
 
     // to bump attempt count incase it isn't processed
     private async bumpAttemptCount(loop_id: string) {
-        const query = 'UPDATE pushmsg SET attempts=attempts+1 WHERE loop_id=?'
+        const query = 'UPDATE pushmsg_v2 SET attempts=attempts+1 WHERE loop_id=?'
 
         return await new Promise((resolve, reject) => {
             db.query(query, [loop_id], function (err, results) {

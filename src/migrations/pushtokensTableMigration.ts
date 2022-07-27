@@ -14,7 +14,7 @@ export default class PushTokensTableMigration {
         const selectQuery =
             'SELECT wallet, device_token, platform from pushtokens LIMIT ? OFFSET ?'
         let moreResults = true
-        var count = 0;
+        var recordsInsertedCount = 0;
         while (moreResults) {
             await new Promise(async (resolve, reject) => {
                     logger.info("Fetching records with limit :: %o and offset :: %o", limit, offset)
@@ -27,17 +27,14 @@ export default class PushTokensTableMigration {
                     })
                 })
                 .then(async response => {
-                    logger.info("Number of records fetched :: %o \n", response.length)
-                    if (response.length == 0) {
+                    logger.info("Number of records fetched :: %o \n", response['length'])
+                    if (response['length'] == 0) {
                         moreResults = false;
                     }
-                    for (let i = 0; i < response.length; i++) {
-                        count = count + 1;
-                        let item = response[i];
-                        const query =
-                            'INSERT IGNORE INTO pushtokens_v2 (wallet, device_token, platform) VALUES (?, ?, ?)'
+                    for (let i = 0; i < response['length']; i++) {
                         try {
-                            await this.insertPushToken(item, query)
+                            await this.insertPushToken(response[i])
+                            recordsInsertedCount += 1;
                         } catch (err) {
                             logger.error(err)
                             throw err
@@ -50,13 +47,11 @@ export default class PushTokensTableMigration {
                 })
             offset = offset + limit
         }
-        logger.info('✅ PushTokensTableMigration Finished. Total records inserted :: ' + count)
-        return {
-            success: 1
-        };
+        logger.info('✅ PushTokensTableMigration Finished. Total records inserted :: ' + recordsInsertedCount);
     }
 
-    public async insertPushToken(item: any, query: any) {
+    public async insertPushToken(item: any) {
+        const query = 'INSERT IGNORE INTO pushtokens (wallet, device_token, platform) VALUES (?, ?, ?)'
         return await new Promise((resolve, reject) => {
                 db.query(query, [item.wallet, item.device_token, item.platform], function(err, results) {
                     if (err) {

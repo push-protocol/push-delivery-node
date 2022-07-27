@@ -12,7 +12,7 @@ import PushMessageService from './pushMessageService';
 export default class FeedsService {
     public async processFeed(feed: any) {
         try {
-            logger.debug('Process feed for sid: %s | payload: %o', feed.sid, feed.payload);
+            logger.debug('Process feed for sid: %s | feed: %o', feed.sid, feed);
             const pushTokens = Container.get(PushTokensService);
             const deviceTokensMeta = await pushTokens.getDeviceTokens(feed.users);
             let devices = deviceTokensMeta['devices'];
