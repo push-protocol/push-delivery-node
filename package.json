@@ -53,6 +53,7 @@
     "method-override": "^3.0.0",
     "moment": "^2.29.4",
     "mysql": "^2.18.1",
+    "node-schedule": "^2.1.0",
     "reflect-metadata": "^0.1.13",
     "secp256k1-v4": "https://github.com/HarshRajat/secp256k1-node",
     "typedi": "^0.10.0",

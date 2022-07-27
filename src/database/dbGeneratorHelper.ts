@@ -5,6 +5,7 @@ module.exports = {
     generateDBStructure: async function (logger) {
         await this.generateDB(logger)
         await this.generateTablePushMessage(logger)
+        await this.generateTablePushMessageArchive(logger)
         await this.generateTablePushTokens(logger)
         await this.generateTableServerTokens(logger)
         await this.generateTableProtocolMeta(logger)
@@ -35,12 +36,11 @@ module.exports = {
     },
 
     generateTablePushMessage: async function (logger) {
-        const query = `CREATE TABLE IF NOT EXISTS pushmsg (
+        const query = `CREATE TABLE IF NOT EXISTS pushmsg_v2 (
       id int(11) NOT NULL AUTO_INCREMENT,
       loop_id varchar(20) NOT NULL COMMENT 'When feeds breaks messages in batches, this ensures uniqueness',
       tokens json NOT NULL,
       payload json NOT NULL,
-      processed tinyint(1) NOT NULL DEFAULT '0',
       attempts int(11) NOT NULL DEFAULT '0',
       timestamp timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       PRIMARY KEY (id),
@@ -57,6 +57,34 @@ module.exports = {
                     } else {
                         logger.info(
                             '     ----[🟠🟢] pushmsg      | Table Created'
+                        )
+                    }
+                    resolve(true)
+                }
+            })
+        })
+    },
+    generateTablePushMessageArchive: async function (logger) {
+        const query = `CREATE TABLE IF NOT EXISTS pushmsg_archive (
+      id int(11) NOT NULL AUTO_INCREMENT,
+      loop_id varchar(20) NOT NULL COMMENT 'When feeds breaks messages in batches, this ensures uniqueness',
+      tokens json NOT NULL,
+      attempts int(11) NOT NULL DEFAULT '0',
+      timestamp timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      UNIQUE KEY loop_id (loop_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;`
+        return new Promise((resolve, reject) => {
+            db.query(query, [], function (err, results) {
+                if (err) {
+                    logger.info('     ----[🔴] pushmsg_archive      | Table Errored')
+                    reject(err)
+                } else {
+                    if (results.changedRows == 0) {
+                        logger.info('     ----[🟢] pushmsg_archive      | Table Exists')
+                    } else {
+                        logger.info(
+                            '     ----[🟠🟢] pushmsg_archive      | Table Created'
                         )
                     }
                     resolve(true)
