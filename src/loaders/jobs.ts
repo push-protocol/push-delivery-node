@@ -39,8 +39,8 @@ export default ({
 
 
     // 2. DELETE STALE MESSAGES
-    // This cron job delete all the messages which could not be delivered
-    // after maxattempts threshold hits, only after 7 days.
+    //This cron job deletes all the messages which could not be delivered after the max 
+    //attempts threshold hits, only after X days.
     logger.info('-- 🛵 Scheduling DELETE STALE MESSAGES Job [Every 360 Mins]');
     schedule.scheduleJob('*/360 * * * *', async function() {
         const messaging = Container.get(MessagingService);
