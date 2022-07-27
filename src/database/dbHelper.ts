@@ -79,18 +79,3 @@ module.exports = {
         })
     },
 }
-
-export function dbquery(
-    query: string,
-    arg1: undefined[],
-    arg2: (err: any, results: any) => void
-) {
-    throw new Error('Function not implemented.')
-}
-export function query(
-    query: string,
-    arg1: undefined[],
-    arg2: (err: any, results: any) => void
-) {
-    throw new Error('Function not implemented.')
-}
