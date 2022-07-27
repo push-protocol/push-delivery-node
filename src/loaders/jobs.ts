@@ -17,6 +17,8 @@ import {
 import schedule from 'node-schedule';
 import MessagingService from '../services/pushMessageService';
 
+import {client} from './redis';
+
 export default ({
     logger
 }) => {
@@ -41,8 +43,8 @@ export default ({
     // 2. DELETE STALE MESSAGES
     //This cron job deletes all the messages which could not be delivered after the max 
     //attempts threshold hits, only after X days.
-    logger.info('-- 🛵 Scheduling DELETE STALE MESSAGES Job [Every 360 Mins]');
-    schedule.scheduleJob('*/360 * * * *', async function() {
+    logger.info('-- 🛵 Scheduling DELETE STALE MESSAGES Job [Every 12 Hours]');
+    schedule.scheduleJob('* */12 * * *', async function() {
         const messaging = Container.get(MessagingService);
         const taskName = 'Delete Stale Messages';
         try {
@@ -53,4 +55,23 @@ export default ({
             logger.error(`Error Object: %o`, err);
         }
     });
+
+    // 1. SERVICE UPTIME
+    // This job updates redis its uptime
+    logger.info('-- 🛵 Scheduling SERVICE UPTIME [Every 10 Seconds]');
+    schedule.scheduleJob('*/10 * * * * *', async function() {
+        const taskName = 'SERVICE UPTIME';
+        try {
+
+            logger.debug(process.env.DELIVERY_NODES_NET)
+            await client.set('connection', '-- 🛵 Redis connection successful');
+            logger.info(await client.get('connection'))
+
+            logger.debug(`🐣 Cron Task Completed -- ${taskName}`);
+        } catch (err) {
+            logger.error(`❌ Cron Task Failed -- ${taskName}`);
+            logger.error(`Error Object: %o`, err);
+        }
+    });
+
 };

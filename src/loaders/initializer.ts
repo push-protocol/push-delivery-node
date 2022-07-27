@@ -1,6 +1,6 @@
 import dbGenerator from '../database/dbGeneratorHelper'
 
-export default async ({ logger, testMode }) => {
+export default async ({ logger }) => {
     logger.info('   -- ✌️   Running DB Checks')
     await dbGenerator.generateDBStructure(logger)
     logger.info('      ✔️   DB Checks completed!')

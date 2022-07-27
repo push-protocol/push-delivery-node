@@ -16,7 +16,6 @@ export const changeLogLevel = (level: string) => {
 const generalConfig = require('./config-general').default
 
 let config
-console.log(process.env.DELIVERY_NODES_NET)
 if (process.env.DELIVERY_NODES_NET == 'PROD') {
     config = require('./config-prod').default
 } else if (process.env.DELIVERY_NODES_NET == 'STAGING') {
