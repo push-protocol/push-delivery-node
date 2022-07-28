@@ -189,7 +189,6 @@ export default class PushMessageService {
             if (valid) {
                 if (fcmResponse.failureCount > 0) {
                     const failedTokens = []
-
                     fcmResponse.responses.forEach((resp, idx) => {
                         if (!resp.success) {
                             failedTokens.push(JSON.parse(row.tokens)[idx])

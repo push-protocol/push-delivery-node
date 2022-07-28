@@ -2,7 +2,7 @@ import config from '../config'
 import logger from '../loaders/logger'
 
 var mysql = require('mysql')
-
+// --- This will be deleted once the migration is done --- //
 var dbpool = mysql.createPool({
     connectionLimit: 1,
     host: config.pushnode_dbhost,

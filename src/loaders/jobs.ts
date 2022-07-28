@@ -1,31 +1,16 @@
-// Do Scheduling
-// https://github.com/node-schedule/node-schedule
-// *    *    *    *    *    *
-// ┬    ┬    ┬    ┬    ┬    ┬
-// │    │    │    │    │    │
-// │    │    │    │    │    └ day of week (0 - 7) (0 or 7 is Sun)
-// │    │    │    │    └───── month (1 - 12)
-// │    │    │    └────────── day of month (1 - 31)
-// │    │    └─────────────── hour (0 - 23)
-// │    └──────────────────── minute (0 - 59)
-// └───────────────────────── second (0 - 59, OPTIONAL)
-// Execute a cron job every 5 Minutes = */5 * * * *
-// Starts from seconds = * * * * * *
 import {
     Container
 } from 'typedi';
 import schedule from 'node-schedule';
 import MessagingService from '../services/pushMessageService';
+import logger from '../loaders/logger'
 
 import {client} from './redis';
 
-export default ({
-    logger
-}) => {
+export default () => {
 
-
-    // 1. MESSAGING SERVICE
-    // Schedule payloads data population for unprocessed payloads
+    // 1. MESSAGE PROCESSING
+    // Schedule message delivery for undelivered messages
     logger.info('-- 🛵 Scheduling Messaging Processing [Every 1 Min]');
     schedule.scheduleJob('*/1 * * * *', async function() {
         const messaging = Container.get(MessagingService);
@@ -39,14 +24,13 @@ export default ({
         }
     });
 
-
     // 2. DELETE STALE MESSAGES
-    //This cron job deletes all the messages which could not be delivered after the max 
-    //attempts threshold hits, only after X days.
+    // This cron job deletes all the messages which could not be delivered after the max 
+    // attempts threshold hits, only after X days.
     logger.info('-- 🛵 Scheduling DELETE STALE MESSAGES Job [Every 12 Hours]');
     schedule.scheduleJob('* */12 * * *', async function() {
         const messaging = Container.get(MessagingService);
-        const taskName = 'Delete Stale Messages';
+        const taskName = 'DELETE STALE MESSAGES';
         try {
             await messaging.deleteStaleMessages();
             logger.info(`🐣 Cron Task Completed -- ${taskName}`);
@@ -56,22 +40,19 @@ export default ({
         }
     });
 
-    // 1. SERVICE UPTIME
-    // This job updates redis its uptime
-    logger.info('-- 🛵 Scheduling SERVICE UPTIME [Every 10 Seconds]');
+    // 2. LATEST SERVICE UPTIME
+    // This job updates redis with the latest uptime
+    logger.info('-- 🛵 Scheduling LATEST SERVICE UPTIME [Every 10 Seconds]');
     schedule.scheduleJob('*/10 * * * * *', async function() {
-        const taskName = 'SERVICE UPTIME';
+        const taskName = 'LATEST SERVICE UPTIME';
         try {
-
             logger.debug(process.env.DELIVERY_NODES_NET)
             await client.set('connection', '-- 🛵 Redis connection successful');
             logger.info(await client.get('connection'))
-
             logger.debug(`🐣 Cron Task Completed -- ${taskName}`);
         } catch (err) {
             logger.error(`❌ Cron Task Failed -- ${taskName}`);
             logger.error(`Error Object: %o`, err);
         }
     });
-
 };

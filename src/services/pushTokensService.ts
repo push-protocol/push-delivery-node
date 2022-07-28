@@ -6,8 +6,8 @@ var db = require('../database/dbHelper')
 export default class PushTokensService {
     public async registerDevice(
         wallet: string,
-        device_token_decrypted: string,
-        platform_decrypted: string
+        device_token: string,
+        platform: string
     ) {
         logger.debug('Registering device')
         const query =
@@ -16,7 +16,7 @@ export default class PushTokensService {
             return new Promise((resolve, reject) => {
                 db.query(
                     query,
-                    [wallet, device_token_decrypted, platform_decrypted],
+                    [wallet, device_token, platform],
                     function (err, results) {
                         if (err) {
                             logger.error(err)
@@ -44,7 +44,6 @@ export default class PushTokensService {
 
     async getDeviceTokens(wallets: any[]) {
         logger.debug('Trying to convert wallets to device tokens: %o', wallets)
-
         const queryClause = "('" + wallets.join("','") + "')"
         const query =
             'SELECT wallet, device_token from pushtokens WHERE wallet IN ' +
