@@ -18,7 +18,7 @@ export default class PushMessageService {
         )
         // Need to ignore to handle the case of feeds process failing, it's a bit hacky
         const query =
-            'INSERT IGNORE INTO pushmsg_v2 (loop_id, tokens, payload) VALUES (?, ?, ?);'
+            'INSERT IGNORE INTO pushmsg (loop_id, tokens, payload) VALUES (?, ?, ?);'
         return await new Promise(async (resolve, reject) => {
                 db.query(
                     query,
@@ -70,7 +70,7 @@ export default class PushMessageService {
             'Trying to batch process all messages which are not processed, 50 requests at a time'
         )
         const query =
-            'SELECT loop_id, tokens, payload FROM pushmsg_v2 WHERE attempts<? ORDER BY   timestamp DESC LIMIT 50'
+            'SELECT loop_id, tokens, payload FROM pushmsg WHERE attempts<? ORDER BY   timestamp DESC LIMIT 50'
         return await new Promise((resolve, reject) => {
                 db.query(
                     query,
@@ -118,7 +118,7 @@ export default class PushMessageService {
             'Trying to delete all the messages which could not be delivered, 1000 messages at a time'
         )
         const query =
-            'DELETE FROM pushmsg_v2 WHERE attempts>=? AND timestamp <= DATE(NOW() - INTERVAL ? DAY) ORDER BY timestamp ASC LIMIT 1000'
+            'DELETE FROM pushmsg WHERE attempts>=? AND timestamp <= DATE(NOW() - INTERVAL ? DAY) ORDER BY timestamp ASC LIMIT 1000'
         let moreResults = true
         let count = 0
         while (moreResults) {
@@ -266,7 +266,7 @@ export default class PushMessageService {
                 throw err
             })
 
-        const query = 'DELETE from pushmsg_v2 WHERE loop_id=?'
+        const query = 'DELETE from pushmsg WHERE loop_id=?'
         return await new Promise((resolve, reject) => {
                 db.query(query, [row.loop_id], function(err, results) {
                     // release the lock
@@ -290,7 +290,7 @@ export default class PushMessageService {
 
     // to bump attempt count incase it isn't processed
     private async bumpAttemptCount(loop_id: string) {
-        const query = 'UPDATE pushmsg_v2 SET attempts=attempts+1 WHERE loop_id=?'
+        const query = 'UPDATE pushmsg SET attempts=attempts+1 WHERE loop_id=?'
         return await new Promise((resolve, reject) => {
                 db.query(query, [loop_id], function(err, results) {
                     // release the lock

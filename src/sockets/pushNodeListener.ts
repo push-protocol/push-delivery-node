@@ -31,7 +31,14 @@ export default async () => {
     const feedProcessor = Container.get(feedProcessorService);
     var feedsCount = 0
 
-    const socket = io.connect(config.PUSH_NODE_WEBSOCKET_URL);
+    const socket = io.connect(config.PUSH_NODE_WEBSOCKET_URL, {
+        reconnectionDelayMax: 10000,
+        reconnectionDelay: 5000,
+        query: {
+            "isDeliveryNode": "true"
+        }
+    });
+
     socket.emit(HISTORICAL_FEED_EVENT, feedsRequest);
 
     // This is to handle scenarios like delivery node down time etc

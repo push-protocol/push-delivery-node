@@ -36,7 +36,7 @@ module.exports = {
     },
 
     generateTablePushMessage: async function (logger) {
-        const query = `CREATE TABLE IF NOT EXISTS pushmsg_v2 (
+        const query = `CREATE TABLE IF NOT EXISTS pushmsg (
       id int(11) NOT NULL AUTO_INCREMENT,
       loop_id varchar(20) NOT NULL COMMENT 'When feeds breaks messages in batches, this ensures uniqueness',
       tokens json NOT NULL,
