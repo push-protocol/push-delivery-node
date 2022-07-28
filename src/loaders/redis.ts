@@ -13,7 +13,9 @@ export default  async ()   =>  {
     await client.connect();
     client.on('error', (err) => logger.error('Redis Client Error', err));
     await client.set('connection', '-- 🛵 Redis connection successful');
-    logger.info(await client.get('connection'))
+    var uptimeKey = process.env.DELIVERY_NODES_NET + "_LATEST_SERVICE_UPTIME"
+    global.PREVIOUS_INSTANCE_LATEST_UPTIME = await client.get(uptimeKey)
+    logger.info("    -- PREVIOUS_INSTANCE_LATEST_UPTIME :: %o", global.PREVIOUS_INSTANCE_LATEST_UPTIME)
  }
 
 export {client}

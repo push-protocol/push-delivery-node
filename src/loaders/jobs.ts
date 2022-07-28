@@ -46,10 +46,9 @@ export default () => {
     schedule.scheduleJob('*/10 * * * * *', async function() {
         const taskName = 'LATEST SERVICE UPTIME';
         try {
-            logger.debug(process.env.DELIVERY_NODES_NET)
-            await client.set('connection', '-- 🛵 Redis connection successful');
-            logger.info(await client.get('connection'))
-            logger.debug(`🐣 Cron Task Completed -- ${taskName}`);
+            var uptimeKey = process.env.DELIVERY_NODES_NET + "_LATEST_SERVICE_UPTIME"
+            await client.set(uptimeKey, Date.now().toString());
+            //logger.debug(`🐣 Cron Task Completed -- ${taskName}`);
         } catch (err) {
             logger.error(`❌ Cron Task Failed -- ${taskName}`);
             logger.error(`Error Object: %o`, err);
