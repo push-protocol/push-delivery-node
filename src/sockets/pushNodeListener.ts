@@ -13,7 +13,8 @@ var artwork = require('../helpers/artwork');
 
 const LIVE_FEED_EVENT = "liveFeeds";
 const HISTORICAL_FEED_EVENT = "historicalFeeds";
-const UNPROCESSED_HISTORICAL_FEEDS_REDIS_KEY = "unprocessedHistoricalFeeds";
+const UNPROCESSED_HISTORICAL_FEEDS_REDIS_KEY = process.env.DELIVERY_NODES_NET + "_UNPROCESSED_HISTORICAL_FEEDS";
+const PUSH_NODE_UNREACHABLE_FROM_REDIS_KEY = process.env.DELIVERY_NODES_NET + "_PUSH_NODE_UNREACHABLE_FROM";
 
 export default async () => {
 
@@ -28,12 +29,27 @@ export default async () => {
         }
     });
 
-    socket.on("connect", () => {
+    var pushNodeUnreachableFrom;
+
+    socket.on("connect", async () => {
         logger.info(artwork.getPushNodeConnectionArtWork())
+        pushNodeUnreachableFrom = await client.get(PUSH_NODE_UNREACHABLE_FROM_REDIS_KEY)
+        if (pushNodeUnreachableFrom != null) {
+            logger.info("!!!! Push node unreachable from time captured :: %o !!!!", new Date(Number(pushNodeUnreachableFrom)));
+        }
+        client.del(PUSH_NODE_UNREACHABLE_FROM_REDIS_KEY)
     });
 
-    socket.on("connect_error", () => {
-        logger.error("Unable to connect to the push node websocket!! Will reconnect after with in next %o seconds !!! ", RECONNECTION_DELAY_MAX)
+    socket.on("connect_error", async () => {
+
+        pushNodeUnreachableFrom = await client.get(PUSH_NODE_UNREACHABLE_FROM_REDIS_KEY)
+
+        if (pushNodeUnreachableFrom == null) {
+            pushNodeUnreachableFrom = Date.now().toString();
+            await client.set(PUSH_NODE_UNREACHABLE_FROM_REDIS_KEY, pushNodeUnreachableFrom);
+        }
+
+        logger.error("!!!! Unable to connect to the push node websocket!! Will reconnect after with in next %o seconds. Push node unreachable from :: %o !!!!", RECONNECTION_DELAY_MAX, new Date(Number(pushNodeUnreachableFrom)))
     });
 
     socket.on(LIVE_FEED_EVENT, (feed) => {
@@ -57,18 +73,28 @@ export default async () => {
     const fetchHistoryUntil = Date.now().toString();
 
     var ranges = await client.get(UNPROCESSED_HISTORICAL_FEEDS_REDIS_KEY)
-    ranges = (ranges == null) ? [] :  JSON.parse(ranges);
+    ranges = (ranges == null) ? [] : JSON.parse(ranges);
 
-    ranges.push({
-        "startTime": global.PREVIOUS_INSTANCE_LATEST_UPTIME,
-        "endTime": fetchHistoryUntil
-    });
+    pushNodeUnreachableFrom = await client.get(PUSH_NODE_UNREACHABLE_FROM_REDIS_KEY);
+
+    if (pushNodeUnreachableFrom != null && pushNodeUnreachableFrom < global.PREVIOUS_INSTANCE_LATEST_UPTIME) {
+        logger.info("!!!! Adding Push node unreachable from time to the range set!!!!")
+        ranges.push({
+            "startTime": pushNodeUnreachableFrom,
+            "endTime": fetchHistoryUntil
+        });
+    } else {
+        logger.info("!!!! Adding previous delivery instance uptime to the range set!!!!")
+        ranges.push({
+            "startTime": global.PREVIOUS_INSTANCE_LATEST_UPTIME,
+            "endTime": fetchHistoryUntil
+        });
+    }
 
     await client.set(UNPROCESSED_HISTORICAL_FEEDS_REDIS_KEY, JSON.stringify(ranges));
     ranges = JSON.parse(await client.get(UNPROCESSED_HISTORICAL_FEEDS_REDIS_KEY));
 
     const feedProcessor = Container.get(feedProcessorService);
-
     const FEED_REQUEST_PAGE_SIZE = 50;
 
     logger.info("-- 🛵 Total historical ranges found :: %o", ranges.length)
@@ -88,21 +114,21 @@ export default async () => {
     var feedsPerRangeCount = 0
     var totalFeedsCount = 0
     socket.on(HISTORICAL_FEED_EVENT, async (data) => {
-        
+
         totalFeedsCount += data['count']
         feedsPerRangeCount += data['count']
 
         if (data['count'] == 0) {
-        
+
             // Reinitializing this counter
             feedsPerRangeCount = 0;
 
             logger.info("!!!! Done with one historical feed range !!!!")
-            
-            logger.info("Total :: %o historical feeds are received between :: %o and :: %o.", feedsPerRangeCount, new Date(Number(feedsRequest.startTime)), new Date(Number(feedsRequest.endTime)))
+
+            logger.info("!!!! Total :: %o historical feeds are received between :: %o and :: %o. !!!!", feedsPerRangeCount, new Date(Number(feedsRequest.startTime)), new Date(Number(feedsRequest.endTime)))
 
             ranges = JSON.parse(await client.get(UNPROCESSED_HISTORICAL_FEEDS_REDIS_KEY))
-            
+
             // Remove this finished range and update the redis
             ranges = ranges.filter(each => {
                 return each.startTime !== feedsRequest.startTime && each.endTime !== feedsRequest.endTime;
@@ -126,8 +152,8 @@ export default async () => {
                 socket.emit(HISTORICAL_FEED_EVENT, feedsRequest);
             }
         } else {
-            logger.info("Received :: %o feeds, current iteration page size :: %o and :: page number :: %o ", data['count'], feedsRequest.page, feedsRequest.pageSize)
-            
+            logger.info("!!!! Received :: %o feeds, current iteration page size :: %o and :: page number :: %o !!!!", data['count'], feedsRequest.page, feedsRequest.pageSize)
+
             for (let i = 0; i < data['feeds'].length; i++) {
                 feedProcessor.processFeed(data['feeds'][i])
             }
