@@ -118,7 +118,7 @@ export default class PushMessageService {
             'Trying to delete all the messages which could not be delivered, 1000 messages at a time'
         )
         const query =
-            'DELETE FROM pushmsg WHERE processed=0 AND attempts>=? AND timestamp <= DATE(NOW() - INTERVAL ? DAY) ORDER BY timestamp ASC LIMIT 1000'
+            'DELETE FROM pushmsg WHERE attempts>=? AND timestamp <= DATE(NOW() - INTERVAL ? DAY) ORDER BY timestamp ASC LIMIT 1000'
         let moreResults = true
         let count = 0
         while (moreResults) {
