@@ -5,6 +5,7 @@ const io = require("socket.io-client");
 import feedProcessorService from '../services/feedProcessorService';
 import config from '../config';
 import logger from '../loaders/logger';
+var artwork = require('../helpers/artwork');
 
 const LIVE_FEED_EVENT = "liveFeeds";
 const HISTORICAL_FEED_EVENT = "historicalFeeds";
@@ -13,7 +14,7 @@ export default async () => {
 
     var fetchHistoryFrom = global.PREVIOUS_INSTANCE_LATEST_UPTIME;
 
-    // If previous instance uptime is not found (which is rare) fetch last hour feeds.
+    // If previous instance uptime is not found (which is rare) fetch last one hour feeds.
     if (!fetchHistoryFrom) {
         var date = new Date();
         date.getHours() - 1;
@@ -30,13 +31,23 @@ export default async () => {
 
     const feedProcessor = Container.get(feedProcessorService);
     var feedsCount = 0
+    const RECONNECTION_DELAY_MAX = 10000;
 
+    // More Details: https://socket.io/docs/v4/client-options/#reconnectiondelay
     const socket = io.connect(config.PUSH_NODE_WEBSOCKET_URL, {
-        reconnectionDelayMax: 10000,
+        reconnectionDelayMax: RECONNECTION_DELAY_MAX,
         reconnectionDelay: 5000,
         query: {
             "isDeliveryNode": "true"
         }
+    });
+
+    socket.on("connect", () => {
+        logger.info(artwork.getPushNodeConnectionArtWork())
+    });
+
+    socket.on("connect_error", () => {
+        logger.error("Unable to connect to the push node websocket!! Will reconnect after with in next %o seconds !!! ", RECONNECTION_DELAY_MAX)
     });
 
     socket.emit(HISTORICAL_FEED_EVENT, feedsRequest);
@@ -64,6 +75,6 @@ export default async () => {
     });
 
     socket.on('disconnect', function() {
-        logger.info("Socket Connection Dropped")
+        logger.error("!!!! Push node socket connection dropped. !!!!")
     })
 }
