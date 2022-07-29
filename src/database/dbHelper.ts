@@ -8,6 +8,7 @@ var dbpool = mysql.createPool({
     host: config.dbhost,
     user: config.dbuser,
     password: config.dbpass,
+    port: config.dbport
 })
 
 var pool = mysql.createPool({
@@ -16,6 +17,7 @@ var pool = mysql.createPool({
     user: config.dbuser,
     password: config.dbpass,
     database: config.dbname,
+    port: config.dbport
 })
 
 module.exports = {

@@ -6,7 +6,7 @@ services:
     networks:
       - main
     ports:
-      - 6379:6379
+      - 6378:6379
     volumes:
       - ./external/redis:/data
   mysql:
@@ -21,7 +21,7 @@ services:
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASS}
     ports:
-      - 3306:3306
+      - 3305:3306
     # Change this to your local path
     volumes:
       - ./external/mysql:/var/lib/mysql/
@@ -36,7 +36,7 @@ services:
       PMA_ARBITRARY: 1
     restart: always
     ports:
-      - 8183:80
+      - 8182:80
 networks:
   main:
     driver: bridge

@@ -19,12 +19,13 @@ export default {
     },
 
     /**
-     * The database config
+     * The delivery node database config
      */
     dbhost: process.env.DB_HOST,
     dbname: process.env.DB_NAME,
     dbuser: process.env.DB_USER,
     dbpass: process.env.DB_PASS,
+    dbport: process.env.DB_PORT,
 
 
     /**
