@@ -23,7 +23,6 @@ export default class PushTokensService {
                             return reject(err)
                         } else {
                             logger.debug(results)
-                            console.log(results)
                             return resolve({ success: 1, data: results })
                         }
                     }

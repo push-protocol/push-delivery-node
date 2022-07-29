@@ -12,10 +12,18 @@ import PushMessageService from './pushMessageService';
 export default class FeedsService {
     public async processFeed(feed: any) {
         try {
-            logger.debug('Process feed for sid: %s | feed: %o', feed.sid, feed);
+            logger.debug('Process feed for sid: %o | feed: %o', feed.sid, feed);
+            if(feed.users.length == 0) {
+                logger.info("The Feed contains empty tokens, hence skipping the feed with sid :: %o ", feed.sid);
+                return;
+            }
             const pushTokens = Container.get(PushTokensService);
             const deviceTokensMeta = await pushTokens.getDeviceTokens(feed.users);
             let devices = deviceTokensMeta['devices'];
+            if(devices.length == 0) {
+                logger.info("The feed has no appropriate device id mappings for the given addresses, hence skipping the feed with sid :: %o ", feed.sid);
+                return;
+            }
             const pushMessage = Container.get(PushMessageService);
             let count = 0;
             while (devices.length) {

@@ -112,7 +112,6 @@ async function startServer(logLevel: string = null, testMode: boolean = false) {
 
         ################################################
         `)
-    console.log(process.env.DELIVERY_NODES_NET )
     })
 }
 
