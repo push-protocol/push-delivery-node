@@ -35,7 +35,6 @@ export default async () => {
 
     socket.on("connect", async () => {
 
-
         logger.info(artwork.getPushNodeConnectionArtWork());
 
         pushNodeUnreachableFrom = await client.get(PUSH_NODE_UNREACHABLE_FROM_REDIS_KEY);
@@ -88,11 +87,7 @@ export default async () => {
             "pageSize": FEED_REQUEST_PAGE_SIZE
         }
 
-        // This is to handle scenarios like delivery node down time etc
-        logger.info("-- 🛵 Initiating history feed fetcher with request body :: %o, requesting feeds between :: %o and :: %o, page :: %o and pagenumber :: %o.", JSON.stringify(feedsRequest), new Date(Number(feedsRequest.startTime)), new Date(Number(feedsRequest.endTime)), feedsRequest.page, feedsRequest.pageSize);
-
-        socket.emit(HISTORICAL_FEED_EVENT, feedsRequest);
-
+        initiateFeedRequest(socket, feedsRequest);
     });
 
     socket.on("connect_error", async () => {
@@ -130,7 +125,6 @@ export default async () => {
             feedsPerRangeCount = 0;
 
             logger.info("!!!! Done with one historical feed range !!!!")
-
             logger.info("!!!! Total :: %o historical feeds are received between :: %o and :: %o. !!!!", feedsPerRangeCount, new Date(Number(feedsRequest.startTime)), new Date(Number(feedsRequest.endTime)))
 
             ranges = JSON.parse(await client.get(UNPROCESSED_HISTORICAL_FEEDS_REDIS_KEY))
@@ -145,7 +139,6 @@ export default async () => {
             if (ranges == 0) {
                 logger.info("!!!! Done with all historical feed ranges Total feeds processed :: %o !!!!", totalFeedsCount)
             } else {
-
                 feedsRequest = {
                     "startTime": ranges[0].startTime,
                     "endTime": ranges[0].endTime,
@@ -153,9 +146,7 @@ export default async () => {
                     "pageSize": FEED_REQUEST_PAGE_SIZE
                 }
 
-                logger.info("-- 🛵 Initiating history feed fetcher with request body :: %o, requesting feeds between :: %o and :: %o, page :: %o and pagenumber :: %o.", JSON.stringify(feedsRequest), new Date(Number(feedsRequest.startTime)), new Date(Number(feedsRequest.endTime)), feedsRequest.page, feedsRequest.pageSize)
-
-                socket.emit(HISTORICAL_FEED_EVENT, feedsRequest);
+                initiateFeedRequest(socket, feedsRequest);
             }
         } else {
             logger.info("!!!! Received :: %o feeds, current iteration page size :: %o and :: page number :: %o !!!!", data['count'], feedsRequest.page, feedsRequest.pageSize)
@@ -165,10 +156,13 @@ export default async () => {
             }
 
             feedsRequest.page += 1
-
-            logger.info("-- 🛵 Initiating history feed fetcher with request body :: %o, requesting feeds between :: %o and :: %o, page :: %o and pagenumber :: %o.", JSON.stringify(feedsRequest), new Date(Number(feedsRequest.startTime)), new Date(Number(feedsRequest.endTime)), feedsRequest.page, feedsRequest.pageSize)
-
-            socket.emit(HISTORICAL_FEED_EVENT, feedsRequest);
+            initiateFeedRequest(socket, feedsRequest);
         }
     });
+}
+
+// This is to handle scenarios like delivery or push node down time
+async function initiateFeedRequest(socket, feedsRequest) {
+    logger.info("-- 🛵 Initiating history feed fetcher with request body :: %o, requesting feeds between :: %o and :: %o, page :: %o and pagenumber :: %o.", JSON.stringify(feedsRequest), new Date(Number(feedsRequest.startTime)), new Date(Number(feedsRequest.endTime)), feedsRequest.page, feedsRequest.pageSize)
+    socket.emit(HISTORICAL_FEED_EVENT, feedsRequest);
 }
