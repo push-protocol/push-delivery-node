@@ -312,4 +312,50 @@ export default class PushMessageService {
                 throw err
             })
     }
+
+    public async isLoopIdDuplicate(loop_id: string) {
+        var query =
+            'SELECT loop_id from pushmsg_archive WHERE loop_id = ?'
+
+        var isDuplicate = await new Promise((resolve, reject) => {
+                db.query(query, [loop_id], function(err, results) {
+                    if (err) {
+                        return reject(err)
+                    } else {
+                        return resolve(results)
+                    }
+                })
+            })
+            .then((response) => {
+                return response.length > 0;
+            })
+            .catch((err) => {
+                logger.error("Error in isLoopIdDuplicate (pushmsg)", err)
+                return false;
+            });
+        if (isDuplicate) {
+            return isDuplicate;
+        } else {
+            query =
+                'SELECT loop_id from pushmsg WHERE loop_id = ?'
+
+            isDuplicate = await new Promise((resolve, reject) => {
+                    db.query(query, [loop_id], function(err, results) {
+                        if (err) {
+                            return reject(err)
+                        } else {
+                            return resolve(results)
+                        }
+                    })
+                })
+                .then((response) => {
+                    return response.length > 0;
+                })
+                .catch((err) => {
+                    logger.error("Error in isLoopIdDuplicate (pushmsg_archive)", err)
+                    return false;
+                });
+            return isDuplicate;
+        }
+    }
 }
