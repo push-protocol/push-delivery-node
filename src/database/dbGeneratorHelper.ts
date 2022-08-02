@@ -7,7 +7,7 @@ module.exports = {
         await this.generateTablePushMessage(logger)
         await this.generateTablePushMessageArchive(logger)
         await this.generateTablePushTokens(logger)
-        await this.generateTableServerTokens(logger);
+        await this.generateTableServerTokens(logger)
     },
     generateDB: async function (logger) {
         const query = `CREATE DATABASE IF NOT EXISTS ${config.deliveryNodeDBName}`
@@ -76,11 +76,15 @@ module.exports = {
         return new Promise((resolve, reject) => {
             db.query(query, [], function (err, results) {
                 if (err) {
-                    logger.info('     ----[🔴] pushmsg_archive      | Table Errored')
+                    logger.info(
+                        '     ----[🔴] pushmsg_archive      | Table Errored'
+                    )
                     reject(err)
                 } else {
                     if (results.changedRows == 0) {
-                        logger.info('     ----[🟢] pushmsg_archive      | Table Exists')
+                        logger.info(
+                            '     ----[🟢] pushmsg_archive      | Table Exists'
+                        )
                     } else {
                         logger.info(
                             '     ----[🟠🟢] pushmsg_archive      | Table Created'
@@ -121,8 +125,8 @@ module.exports = {
             })
         })
     },
-    generateTableServerTokens: async function(logger) {
-    const query = `CREATE TABLE IF NOT EXISTS servertokens (
+    generateTableServerTokens: async function (logger) {
+        const query = `CREATE TABLE IF NOT EXISTS servertokens (
       id int(11) NOT NULL AUTO_INCREMENT,
       server_token varchar(80) NOT NULL,
       for_wallet varchar(42) NOT NULL,
@@ -131,22 +135,26 @@ module.exports = {
       PRIMARY KEY (id),
       UNIQUE KEY for_wallet_2 (for_wallet),
       KEY for_wallet (for_wallet)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;`;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;`
 
-    return new Promise((resolve, reject) => {
-      db.query(query, [], function(err, results) {
-        if (err) {
-          logger.info('     ----[🔴] servertokens   | Table Errored');
-          reject(err);
-        } else {
-          if (results.changedRows == 0) {
-            logger.info('     ----[🟢] servertokens   | Table Exists');
-          } else {
-            logger.info('     ----[🟠🟢] servertokens   | Table Created');
-          }
-          resolve(true);
-        }
-      });
-    });
-  }
+        return new Promise((resolve, reject) => {
+            db.query(query, [], function (err, results) {
+                if (err) {
+                    logger.info('     ----[🔴] servertokens   | Table Errored')
+                    reject(err)
+                } else {
+                    if (results.changedRows == 0) {
+                        logger.info(
+                            '     ----[🟢] servertokens   | Table Exists'
+                        )
+                    } else {
+                        logger.info(
+                            '     ----[🟠🟢] servertokens   | Table Created'
+                        )
+                    }
+                    resolve(true)
+                }
+            })
+        })
+    },
 }

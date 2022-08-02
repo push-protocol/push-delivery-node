@@ -8,7 +8,7 @@ var dbpool = mysql.createPool({
     host: config.deliveryNodeDBHost,
     user: config.deliveryNodeDBUser,
     password: config.deliveryNodeDBPass,
-    port: config.deliveryNodeDBPort
+    port: config.deliveryNodeDBPort,
 })
 
 var pool = mysql.createPool({
@@ -17,7 +17,7 @@ var pool = mysql.createPool({
     user: config.deliveryNodeDBUser,
     password: config.deliveryNodeDBPass,
     database: config.deliveryNodeDBName,
-    port: config.deliveryNodeDBPort
+    port: config.deliveryNodeDBPort,
 })
 
 module.exports = {

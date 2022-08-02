@@ -1,7 +1,4 @@
-import {
-    Service,
-    Container
-} from 'typedi'
+import { Service, Container } from 'typedi'
 import config from '../config'
 import logger from '../loaders/logger'
 import PushTokensService from './pushTokensService'
@@ -20,42 +17,42 @@ export default class PushMessageService {
         const query =
             'INSERT IGNORE INTO pushmsg (loop_id, tokens, payload) VALUES (?, ?, ?);'
         return await new Promise(async (resolve, reject) => {
-                db.query(
-                    query,
-                    [loop_id, JSON.stringify(tokens), JSON.stringify(payload)],
-                    function(err, results) {
-                        if (err) {
-                            return reject(err)
-                        } else {
-                            return resolve(results)
-                        }
+            db.query(
+                query,
+                [loop_id, JSON.stringify(tokens), JSON.stringify(payload)],
+                function (err, results) {
+                    if (err) {
+                        return reject(err)
+                    } else {
+                        return resolve(results)
                     }
-                )
-            })
+                }
+            )
+        })
             .then(async (response) => {
                 logger.info('✅ Completed addMessage(): %o', response)
                 const row = {
-                    "loop_id": loop_id,
-                    "tokens": JSON.stringify(tokens),
-                    "payload": JSON.stringify(payload)
+                    loop_id: loop_id,
+                    tokens: JSON.stringify(tokens),
+                    payload: JSON.stringify(payload),
                 }
                 this.processMessage(row)
                     .then((response) => {
                         logger.debug(
                             'Completed processMessages() for loop_id: ' +
-                            loop_id
+                                loop_id
                         )
                     })
                     .catch((err) => {
                         logger.error(
                             '🔥 Error processMessages() for loop_id: ' +
-                            loop_id,
+                                loop_id,
                             err
                         )
                     })
                 return {
                     success: 1,
-                    loop_id: loop_id
+                    loop_id: loop_id,
                 }
             })
             .catch((err) => {
@@ -72,18 +69,18 @@ export default class PushMessageService {
         const query =
             'SELECT loop_id, tokens, payload FROM pushmsg WHERE attempts<? ORDER BY  timestamp DESC LIMIT 50'
         return await new Promise((resolve, reject) => {
-                db.query(
-                    query,
-                    [config.messagingMaxAttempts],
-                    function(err, results) {
-                        if (err) {
-                            return reject(err)
-                        } else {
-                            return resolve(results)
-                        }
+            db.query(
+                query,
+                [config.messagingMaxAttempts],
+                function (err, results) {
+                    if (err) {
+                        return reject(err)
+                    } else {
+                        return resolve(results)
                     }
-                )
-            })
+                }
+            )
+        })
             .then((response) => {
                 logger.info('✅ Completed batchProcessMessages(): %o', response)
                 // Now Loop the channel data
@@ -92,19 +89,19 @@ export default class PushMessageService {
                         .then((response) => {
                             logger.debug(
                                 'Completed processMessages() for loop_id: ' +
-                                row.loop_id
+                                    row.loop_id
                             )
                         })
                         .catch((err) => {
                             logger.error(
                                 '🔥 Error processMessages() for loop_id: ' +
-                                row.loop_id,
+                                    row.loop_id,
                                 err
                             )
                         })
                 }
                 return {
-                    success: 1
+                    success: 1,
                 }
             })
             .catch((err) => {
@@ -123,29 +120,36 @@ export default class PushMessageService {
         let count = 0
         while (moreResults) {
             await new Promise((resolve, reject) => {
-                    db.query(
-                        query,
-                        [config.messagingMaxAttempts, config.preserveStaleMessagesDays],
-                        function(err, results) {
-                            if (err) {
-                                return reject(err)
-                            } else {
-                                return resolve(results)
-                            }
+                db.query(
+                    query,
+                    [
+                        config.messagingMaxAttempts,
+                        config.preserveStaleMessagesDays,
+                    ],
+                    function (err, results) {
+                        if (err) {
+                            return reject(err)
+                        } else {
+                            return resolve(results)
                         }
-                    )
-                })
+                    }
+                )
+            })
                 .then((response) => {
-                    count += response['affectedRows'];
+                    count += response['affectedRows']
                     if (response['affectedRows'] == 0) {
-                        moreResults = false;
-                        logger.info("No more records left for deletion, exiting the loop")
+                        moreResults = false
+                        logger.info(
+                            'No more records left for deletion, exiting the loop'
+                        )
                     } else {
-                        logger.info("Deleted %s records in this iteration. Moving to next iteration")
+                        logger.info(
+                            'Deleted %s records in this iteration. Moving to next iteration'
+                        )
                     }
 
                     return {
-                        success: 1
+                        success: 1,
                     }
                 })
                 .catch((err) => {
@@ -153,7 +157,10 @@ export default class PushMessageService {
                     throw err
                 })
         }
-        logger.info('✅ Completed deleteStaleMessages() Total Deleted %s records', count)
+        logger.info(
+            '✅ Completed deleteStaleMessages() Total Deleted %s records',
+            count
+        )
     }
 
     public async processMessage(row: any) {
@@ -219,7 +226,7 @@ export default class PushMessageService {
                     await this.finishProcessing(row)
                     logger.info('✅ Completed processMessage()')
                     return {
-                        success: 1
+                        success: 1,
                     }
                 } catch (e) {
                     valid = false
@@ -249,14 +256,18 @@ export default class PushMessageService {
             'INSERT IGNORE INTO pushmsg_archive (loop_id, tokens, attempts) VALUES (?, ?, ?);'
 
         await new Promise((resolve, reject) => {
-                db.query(insert_query, [row.loop_id, row.tokens, row.attempts], function(err, results) {
+            db.query(
+                insert_query,
+                [row.loop_id, row.tokens, row.attempts],
+                function (err, results) {
                     if (err) {
                         return reject(err)
                     } else {
                         return resolve(results)
                     }
-                })
-            })
+                }
+            )
+        })
             .then((response) => {
                 logger.info('✅ Added message to acrchive')
                 return true
@@ -268,16 +279,16 @@ export default class PushMessageService {
 
         const query = 'DELETE from pushmsg WHERE loop_id=?'
         return await new Promise((resolve, reject) => {
-                db.query(query, [row.loop_id], function(err, results) {
-                    // release the lock
-                    delete config.LOCK_MESSAGING_LOOPIDS[row.loop_id]
-                    if (err) {
-                        return reject(err)
-                    } else {
-                        return resolve(results)
-                    }
-                })
+            db.query(query, [row.loop_id], function (err, results) {
+                // release the lock
+                delete config.LOCK_MESSAGING_LOOPIDS[row.loop_id]
+                if (err) {
+                    return reject(err)
+                } else {
+                    return resolve(results)
+                }
             })
+        })
             .then((response) => {
                 logger.info('✅ Completed finishProcessing()')
                 return true
@@ -292,17 +303,17 @@ export default class PushMessageService {
     private async bumpAttemptCount(loop_id: string) {
         const query = 'UPDATE pushmsg SET attempts=attempts+1 WHERE loop_id=?'
         return await new Promise((resolve, reject) => {
-                db.query(query, [loop_id], function(err, results) {
-                    // release the lock
-                    delete config.LOCK_MESSAGING_LOOPIDS[loop_id]
+            db.query(query, [loop_id], function (err, results) {
+                // release the lock
+                delete config.LOCK_MESSAGING_LOOPIDS[loop_id]
 
-                    if (err) {
-                        return reject(err)
-                    } else {
-                        return resolve(results)
-                    }
-                })
+                if (err) {
+                    return reject(err)
+                } else {
+                    return resolve(results)
+                }
             })
+        })
             .then((response) => {
                 logger.info('✅ Completed bumpAttemptCount()')
                 return true
@@ -314,11 +325,31 @@ export default class PushMessageService {
     }
 
     public async isLoopIdDuplicate(loop_id: string) {
-        var query =
-            'SELECT loop_id from pushmsg_archive WHERE loop_id = ?'
+        var query = 'SELECT loop_id from pushmsg_archive WHERE loop_id = ?'
 
         var isDuplicate = await new Promise((resolve, reject) => {
-                db.query(query, [loop_id], function(err, results) {
+            db.query(query, [loop_id], function (err, results) {
+                if (err) {
+                    return reject(err)
+                } else {
+                    return resolve(results)
+                }
+            })
+        })
+            .then((response) => {
+                return response.length > 0
+            })
+            .catch((err) => {
+                logger.error('Error in isLoopIdDuplicate (pushmsg)', err)
+                return false
+            })
+        if (isDuplicate) {
+            return isDuplicate
+        } else {
+            query = 'SELECT loop_id from pushmsg WHERE loop_id = ?'
+
+            isDuplicate = await new Promise((resolve, reject) => {
+                db.query(query, [loop_id], function (err, results) {
                     if (err) {
                         return reject(err)
                     } else {
@@ -326,36 +357,17 @@ export default class PushMessageService {
                     }
                 })
             })
-            .then((response) => {
-                return response.length > 0;
-            })
-            .catch((err) => {
-                logger.error("Error in isLoopIdDuplicate (pushmsg)", err)
-                return false;
-            });
-        if (isDuplicate) {
-            return isDuplicate;
-        } else {
-            query =
-                'SELECT loop_id from pushmsg WHERE loop_id = ?'
-
-            isDuplicate = await new Promise((resolve, reject) => {
-                    db.query(query, [loop_id], function(err, results) {
-                        if (err) {
-                            return reject(err)
-                        } else {
-                            return resolve(results)
-                        }
-                    })
-                })
                 .then((response) => {
-                    return response.length > 0;
+                    return response.length > 0
                 })
                 .catch((err) => {
-                    logger.error("Error in isLoopIdDuplicate (pushmsg_archive)", err)
-                    return false;
-                });
-            return isDuplicate;
+                    logger.error(
+                        'Error in isLoopIdDuplicate (pushmsg_archive)',
+                        err
+                    )
+                    return false
+                })
+            return isDuplicate
         }
     }
 }

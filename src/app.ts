@@ -1,11 +1,11 @@
-import { startServer } from './appInit';
+import { startServer } from './appInit'
 
 // Call server from here to ensure test cases run fine
-startServer();
+startServer()
 
 // stopServer shuts down the server. Used in tests.
 async function stopServer() {
-  process.exit(0);
+    process.exit(0)
 }
 
-export {startServer, stopServer}
+export { startServer, stopServer }

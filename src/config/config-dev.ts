@@ -7,5 +7,5 @@ export default {
      */
     messagingMaxAttempts: 5,
     messagingChunkMaxSize: 500,
-    preserveStaleMessagesDays: 7
+    preserveStaleMessagesDays: 7,
 }

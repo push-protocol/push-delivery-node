@@ -27,7 +27,6 @@ export default {
     deliveryNodeDBPass: process.env.DELIVERY_NODE_DB_PASS,
     deliveryNodeDBPort: process.env.DELIVERY_NODE_DB_PORT,
 
-
     /**
      * The push node database config .. this needs to be deleted post the migration
      */

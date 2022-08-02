@@ -1,17 +1,7 @@
-import {
-    Router,
-    Request,
-    Response,
-    NextFunction
-} from 'express'
-import {
-    Container
-} from 'typedi'
+import { Router, Request, Response, NextFunction } from 'express'
+import { Container } from 'typedi'
 import middlewares from '../middlewares'
-import {
-    celebrate,
-    Joi
-} from 'celebrate'
+import { celebrate, Joi } from 'celebrate'
 import logger from '../../loaders/logger'
 import PushTokensTableMigration from '../../migrations/pushtokensTableMigration'
 
@@ -30,11 +20,13 @@ export default (app: Router) => {
                 'Calling /migrations/pushtokens_table_from_push_node_to_delivery_node'
             )
             try {
-                const pushTokensTableMigration = Container.get(PushTokensTableMigration);
-                pushTokensTableMigration.copyPushTokensTable();
+                const pushTokensTableMigration = Container.get(
+                    PushTokensTableMigration
+                )
+                pushTokensTableMigration.copyPushTokensTable()
                 return res.status(201).json({
-                    "status": "started"
-                });
+                    status: 'started',
+                })
             } catch (e) {
                 logger.error('🔥 error: %o', e)
                 return next(e)

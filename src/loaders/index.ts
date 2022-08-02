@@ -4,10 +4,10 @@ import logger from './logger'
 import initializer from './initializer'
 import dbLoader from './db'
 import pushNodeListener from '../sockets/pushNodeListener'
-import jobsLoader from './jobs';
-import redisLoader from './redis';
+import jobsLoader from './jobs'
+import redisLoader from './redis'
 
-export default async ({ expressApp}) => {
+export default async ({ expressApp }) => {
     logger.info('✔️   Loaders connected!')
 
     logger.info('✌️   Database connecting!')
@@ -26,11 +26,11 @@ export default async ({ expressApp}) => {
     await initializer()
     logger.info('✔️   Initializer completed!')
 
-    logger.info('✌️   Loading jobs!');
-    await jobsLoader();
-    logger.info('✔️   Jobs loaded!');
+    logger.info('✌️   Loading jobs!')
+    await jobsLoader()
+    logger.info('✔️   Jobs loaded!')
 
-    logger.info('✌️   Loading express!');
+    logger.info('✌️   Loading express!')
     await expressLoader({ app: expressApp })
     logger.info('✔️   Express loaded!')
 
