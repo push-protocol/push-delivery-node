@@ -5,19 +5,19 @@ var mysql = require('mysql')
 
 var dbpool = mysql.createPool({
     connectionLimit: 1,
-    host: config.dbhost,
-    user: config.dbuser,
-    password: config.dbpass,
-    port: config.dbport
+    host: config.deliveryNodeDBHost,
+    user: config.deliveryNodeDBUser,
+    password: config.deliveryNodeDBPass,
+    port: config.deliveryNodeDBPort
 })
 
 var pool = mysql.createPool({
     connectionLimit: 10,
-    host: config.dbhost,
-    user: config.dbuser,
-    password: config.dbpass,
-    database: config.dbname,
-    port: config.dbport
+    host: config.deliveryNodeDBHost,
+    user: config.deliveryNodeDBUser,
+    password: config.deliveryNodeDBPass,
+    database: config.deliveryNodeDBName,
+    port: config.deliveryNodeDBPort
 })
 
 module.exports = {

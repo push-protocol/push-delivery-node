@@ -21,20 +21,20 @@ export default {
     /**
      * The delivery node database config
      */
-    dbhost: process.env.DB_HOST,
-    dbname: process.env.DB_NAME,
-    dbuser: process.env.DB_USER,
-    dbpass: process.env.DB_PASS,
-    dbport: process.env.DB_PORT,
+    deliveryNodeDBHost: process.env.DELIVERY_NODE_DB_HOST,
+    deliveryNodeDBName: process.env.DELIVERY_NODE_DB_NAME,
+    deliveryNodeDBUser: process.env.DELIVERY_NODE_DB_USER,
+    deliveryNodeDBPass: process.env.DELIVERY_NODE_DB_PASS,
+    deliveryNodeDBPort: process.env.DELIVERY_NODE_DB_PORT,
 
 
     /**
      * The push node database config .. this needs to be deleted post the migration
      */
-    pushnode_dbhost: process.env.PUSH_NODE_DB_HOST,
-    pushnode_dbname: process.env.PUSH_NODE_DB_NAME,
-    pushnode_dbuser: process.env.PUSH_NODE_DB_USER,
-    pushnode_dbpass: process.env.PUSH_NODE_DB_PASS,
+    pushNodeDBHost: process.env.PUSH_NODE_DB_HOST,
+    pushNodeDBName: process.env.PUSH_NODE_DB_NAME,
+    pushNodeDBUser: process.env.PUSH_NODE_DB_USER,
+    pushNodeDBPass: process.env.PUSH_NODE_DB_PASS,
 
     staticServePath: staticServeURI,
 

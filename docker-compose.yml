@@ -17,9 +17,9 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: 'pass'
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASS}
+      MYSQL_DATABASE: ${DELIVERY_NODE_DB_NAME}
+      MYSQL_USER: ${DELIVERY_NODE_DB_USER}
+      MYSQL_PASSWORD: ${DELIVERY_NODE_DB_PASS}
     ports:
       - 3305:3306
     # Change this to your local path

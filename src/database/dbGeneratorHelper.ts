@@ -9,7 +9,7 @@ module.exports = {
         await this.generateTablePushTokens(logger)
     },
     generateDB: async function (logger) {
-        const query = `CREATE DATABASE IF NOT EXISTS ${config.dbname}`
+        const query = `CREATE DATABASE IF NOT EXISTS ${config.deliveryNodeDBName}`
         return new Promise((resolve, reject) => {
             db.dbquery(query, [], function (err, results) {
                 if (err) {

@@ -5,17 +5,17 @@ var mysql = require('mysql')
 // --- This will be deleted once the migration is done --- //
 var dbpool = mysql.createPool({
     connectionLimit: 1,
-    host: config.pushnode_dbhost,
-    user: config.pushnode_dbuser,
-    password: config.pushnode_dbpass,
+    host: config.pushNodeDBHost,
+    user: config.pushNodeDBUser,
+    password: config.pushNodeDBPass,
 })
 
 var pool = mysql.createPool({
     connectionLimit: 10,
-    host: config.pushnode_dbhost,
-    user: config.pushnode_dbuser,
-    password: config.pushnode_dbpass,
-    database: config.pushnode_dbname,
+    host: config.pushNodeDBHost,
+    user: config.pushNodeDBUser,
+    password: config.pushNodeDBPass,
+    database: config.pushNodeDBName,
 })
 
 module.exports = {
