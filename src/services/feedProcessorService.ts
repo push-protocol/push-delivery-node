@@ -7,7 +7,6 @@ import logger from '../loaders/logger'
 
 import PushTokensService from './pushTokensService';
 import PushMessageService from './pushMessageService';
-var db = require('../database/dbHelper')
 
 @Service()
 export default class FeedsService {

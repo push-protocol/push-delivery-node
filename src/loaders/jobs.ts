@@ -3,6 +3,7 @@ import {
 } from 'typedi';
 import schedule from 'node-schedule';
 import MessagingService from '../services/pushMessageService';
+import AuthService from '../services/authService';
 import logger from '../loaders/logger'
 
 import {client} from './redis';
@@ -40,7 +41,7 @@ export default () => {
         }
     });
 
-    // 2. LATEST SERVICE UPTIME
+    // 3. LATEST SERVICE UPTIME
     // This job updates redis with the latest uptime
     logger.info('-- 🛵 Scheduling LATEST SERVICE UPTIME [Every 10 Seconds]');
     schedule.scheduleJob('*/10 * * * * *', async function() {
@@ -54,4 +55,21 @@ export default () => {
             logger.error(`Error Object: %o`, err);
         }
     });
+
+  // 4. AUTH SERVICE
+  // Schedule automatic deletion of servertokens
+  logger.info('-- 🛵 Scheduling automatic deletion of server tokens [Every 10 Mins]');
+  schedule.scheduleJob('*/10 * * * *', async function() {
+    const auth = Container.get(AuthService);
+    const taskName = 'Server Tokens Deleted';
+
+    try {
+      await auth.deleteExpiredServerTokens();
+      logger.info(`🐣 Cron Task Completed -- ${taskName}`);
+    } catch (err) {
+      logger.error(`❌ Cron Task Failed -- ${taskName}`);
+      logger.error(`Error Object: %o`, err);
+    }
+  });
+
 };
