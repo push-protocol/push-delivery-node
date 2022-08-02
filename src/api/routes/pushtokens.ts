@@ -46,7 +46,7 @@ export default (app: Router) => {
     )
 
     route.post(
-        '/deregister_wallet_offchain',
+        '/deregister_wallet_token',
         celebrate({
             body: Joi.object({
                 message: {
