@@ -19,7 +19,6 @@ var fetchHistoryFrom
 var ranges
 const FEED_REQUEST_PAGE_SIZE = 50
 const RECONNECTION_DELAY_MAX = 10000
-
 export default async () => {
     // More Details: https://socket.io/docs/v4/client-options/#reconnectiondelay
     const socket = io.connect(config.PUSH_NODE_WEBSOCKET_URL, {
@@ -80,7 +79,7 @@ export default async () => {
                 '!!!! Adding previous delivery instance uptime to the range set!!!!'
             )
             ranges.push({
-                startTime: global.PREVIOUS_INSTANCE_LATEST_UPTIME,
+                startTime: fetchHistoryFrom,
                 endTime: fetchHistoryUntil,
             })
         }
@@ -89,6 +88,7 @@ export default async () => {
             UNPROCESSED_HISTORICAL_FEEDS_REDIS_KEY,
             JSON.stringify(ranges)
         )
+
         ranges = JSON.parse(
             await client.get(UNPROCESSED_HISTORICAL_FEEDS_REDIS_KEY)
         )
@@ -102,7 +102,7 @@ export default async () => {
             pageSize: FEED_REQUEST_PAGE_SIZE,
         }
 
-        initiateFeedRequest(socket, feedsRequest)
+        await initiateFeedRequest(socket, feedsRequest)
     })
 
     socket.on('connect_error', async () => {
@@ -125,8 +125,8 @@ export default async () => {
         )
     })
 
-    socket.on(LIVE_FEED_EVENT, (feed) => {
-        feedProcessor.processFeed(feed)
+    socket.on(LIVE_FEED_EVENT, async (feed) => {
+        await feedProcessor.processFeed(feed)
     })
 
     socket.on('disconnect', function () {
@@ -183,7 +183,7 @@ export default async () => {
                     pageSize: FEED_REQUEST_PAGE_SIZE,
                 }
 
-                initiateFeedRequest(socket, feedsRequest)
+                await initiateFeedRequest(socket, feedsRequest)
             }
         } else {
             logger.info(
@@ -194,11 +194,11 @@ export default async () => {
             )
 
             for (let i = 0; i < data['feeds'].length; i++) {
-                feedProcessor.processFeed(data['feeds'][i])
+                await feedProcessor.processFeed(data['feeds'][i])
             }
 
             feedsRequest.page += 1
-            initiateFeedRequest(socket, feedsRequest)
+            await initiateFeedRequest(socket, feedsRequest)
         }
     })
 }

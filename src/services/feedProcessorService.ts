@@ -4,6 +4,7 @@ import logger from '../loaders/logger'
 
 import PushTokensService from './pushTokensService'
 import PushMessageService from './pushMessageService'
+var utils = require('../helpers/utilsHelper')
 
 @Service()
 export default class FeedsService {
@@ -31,6 +32,8 @@ export default class FeedsService {
             }
             const pushMessage = Container.get(PushMessageService)
             let count = 0
+            const msgPayload = utils.generateMessagingPayloadFromFeed(feed.payload)
+
             while (devices.length) {
                 const deviceChunk = devices.splice(
                     0,
@@ -42,7 +45,7 @@ export default class FeedsService {
                     await pushMessage.addMessage(
                         loop_id,
                         deviceChunk,
-                        feed.payload
+                        msgPayload
                     )
                     count = count + 1
                 } else {
