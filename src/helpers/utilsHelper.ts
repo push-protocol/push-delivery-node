@@ -1,3 +1,5 @@
+import { ethers } from 'ethers';
+
 module.exports = {
     // To Generate Random Password
     generateRandomWord: (length, includeSpecial) => {
@@ -17,6 +19,9 @@ module.exports = {
         return result
     },
 
+  isValidAddress: (address) => {
+    return ethers.utils.isAddress(address);
+  },
 
     generateMessagingPayloadFromFeed: feedPayload => {
     let payload = {
@@ -44,5 +49,31 @@ module.exports = {
     };
 
     return payload;
-  }
+  },
+
+    /**
+     * @param addressinCAIP This address can be in the CAIP10 format (example: eip155:1:0xabc) or in the changed format eip155:0xabc (without the chainId). When this happens, the chainId will be null
+     * @returns 
+     */
+    convertCaipToAddress: function(addressinCAIP: string): { result: string, err: string | null } {
+      let addressComponent = addressinCAIP.split(":");
+      if (
+        addressComponent.length === 3 &&
+        addressComponent[0] === "eip155" &&
+        this.isValidAddress(addressComponent[2])
+      ) {
+        return { result: addressComponent[2], err: null };
+      }
+      // Wallet can be in the new caip10 format used in w2w: eip155:walletAddress
+      else if (
+        addressComponent.length === 2 &&
+        addressComponent[0] === "eip155" &&
+        this.isValidAddress(addressComponent[1])
+      ) {
+        const wallet = addressinCAIP.replace("eip155:", "")
+        return { result: wallet, err: null }
+      } else {
+        throw new Error("Invalid CAIP Format");
+      }
+  },
 }

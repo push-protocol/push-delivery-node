@@ -49,8 +49,9 @@ export default {
 
     /**
      * API configs
-     */
+    */
     api: {
-        prefix: '/apis',
-    },
+        prefix: "/apis",
+        version: "v1"
+    }
 }
