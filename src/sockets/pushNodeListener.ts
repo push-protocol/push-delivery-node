@@ -25,7 +25,7 @@ export default async () => {
         reconnectionDelayMax: RECONNECTION_DELAY_MAX,
         reconnectionDelay: 5000,
         query: {
-            isDeliveryNode: 'true',
+            mode: 'delivery',
         },
     })
 
