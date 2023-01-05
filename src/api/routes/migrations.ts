@@ -14,7 +14,7 @@ export default (app: Router) => {
         celebrate({
             body: Joi.object({}),
         }),
-        middlewares.onlyLocalhost,
+	// middlewares.onlyLocalhost,
         async (req: Request, res: Response, next: NextFunction) => {
             logger.info(
                 'Calling /migrations/pushtokens_table_from_push_node_to_delivery_node'
