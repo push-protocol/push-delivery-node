@@ -1,8 +1,8 @@
 module.exports = {
   apps : [{
-    name: "EPNS Push Dev",
+    name: "Push Delivery Staging",
     script: "build/app.js",
-    instances: "max",
+    instances: "1",
     max_memory_restart: "256M",
     env: {
       NODE_ENV: "development"

@@ -55,6 +55,7 @@
     "moment": "^2.29.4",
     "mysql": "^2.18.1",
     "node-schedule": "^2.1.0",
+    "pm2-logrotate-s3": "^3.0.3",
     "redis": "^4.2.0",
     "reflect-metadata": "^0.1.13",
     "secp256k1-v4": "https://github.com/HarshRajat/secp256k1-node",
