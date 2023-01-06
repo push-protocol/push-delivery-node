@@ -39,22 +39,18 @@ export default (app: Router) => {
                 req.body
             );
             try {
-                const pushInstance = Container.get(PushTokensService);
-                const {
-                    result: wallet,
-                    err
-                } = utils.convertCaipToAddress(req.body.wallet);
-                if (wallet && !err) {
-                    const {
-                        success
-                    } = await pushInstance.registerDevice(
-                        wallet,
-                        req.body.device_token,
-                        req.body.platform
-                    );
-                    return res.status(204).json();
+                if (utils.isValidPartialCAIP10Address(req.body.wallet)) {
+                    const pushInstance = Container.get(PushTokensService);
+                        const {
+                            success
+                        } = await pushInstance.registerDevice(
+                            req.body.wallet,
+                            req.body.device_token,
+                            req.body.platform
+                        );
+                        return res.status(204).json();
                 } else {
-                    return next(err);
+                    return next(new Error("Invalid wallet format"));
                 }
             } catch (e) {
                 logger.error(

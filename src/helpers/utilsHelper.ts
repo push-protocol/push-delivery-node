@@ -23,6 +23,17 @@ module.exports = {
     return ethers.utils.isAddress(address);
   },
 
+  isValidPartialCAIP10Address: function (addressinPartialCAIP: string): boolean {
+    try{
+      let addressComponent = addressinPartialCAIP.split(":");
+      if(addressComponent.length === 2 && addressComponent[0] == "eip155")return true;
+      return false;
+    }
+    catch(err){
+      return false;
+    }
+  },
+
     generateMessagingPayloadFromFeed: feedPayload => {
     let payload = {
       notification: feedPayload.notification,
