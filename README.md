@@ -103,5 +103,7 @@ curl --location --request POST 'https://<delivery_node_url>/apis/v1/pushtokens/r
 - Monitoring APIs
 
 
+## Note
 
+The Push delivery node is  a copyrighted work owned by Push org (Ethereum Push Notification Service). Unauthorized use of the Push delivery node product for profit or by competitors is strictly prohibited. While the Push delivery node product may be used for demonstration or illustrative purposes in the context of web3, it may not be used to compete with or copy the products or services of the Push Protocol. Any violation of this disclaimer may result in legal action.
 
