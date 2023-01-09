@@ -135,7 +135,7 @@ public/cache/*
 logs/*
 !logs/.keepfolderalive
 .env
-epns-firebase-adminsdk.json
+firebase-adminsdk.json
 external/
 package-lock.json
 yarn.lock

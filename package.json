@@ -1,7 +1,7 @@
 {
-  "name": "epns-delivery-service",
+  "name": "push-delivery-node",
   "version": "1.0.0",
-  "description": "EPNS Delivery Node",
+  "description": "PUSH Delivery Node",
   "main": "src/app.ts",
   "scripts": {
     "build": "rimraf ./build && tsc",
@@ -18,8 +18,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ethereum-push-notification-service/epns-delivery-service.git"
-  },
+    "url": "git+https://github.com/ethereum-push-notification-service/push-delivery-node.git"
+  }, 
   "keywords": [
     "EPNS",
     "Delivery",
@@ -36,9 +36,9 @@
   "author": "Shoaib Mohammed",
   "license": "UNLICENSED",
   "bugs": {
-    "url": "https://github.com/ethereum-push-notification-service/epns-delivery-service/issues"
+    "url": "https://github.com/ethereum-push-notification-service/push-delivery-node/issues"
   },
-  "homepage": "https://github.com/ethereum-push-notification-service/epns-delivery-service#readme",
+  "homepage": "https://github.com/ethereum-push-notification-service/push-delivery-node#readme",
   "dependencies": {
     "celebrate": "^15.0.1",
     "chalk": "^4.1.2",
