@@ -8,14 +8,14 @@ export default {
      */
     environment: env,
     deliveryNodesNet: deliveryNodesNet,
-    port: parseInt(process.env.PORT || '3000', 10),
-    runningOnMachine: process.env.RUNNING_ON_MACHINE,
+    port: parseInt(process.env.PORT || '7575', 10),
+    //runningOnMachine: process.env.RUNNING_ON_MACHINE,
 
     /**
      * Used by winston logger
      */
     logs: {
-        level: process.env.LOG_LEVEL || 'silly',
+        level: process.env.LOG_LEVEL || 'debug',
     },
 
     /**
