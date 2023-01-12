@@ -68,6 +68,11 @@ You should then be able to start the server using:
 npm start
 ```
 
+Or, you can build and start the server via docker-compose:
+
+```sh
+docker compose --profile prod --env-file .env up -d
+```
 
 
 ## FCM Setup
@@ -97,7 +102,7 @@ curl --location --request POST 'https://<delivery_node_url>/apis/v1/pushtokens/r
 
 ## Upcoming features
 
-- Dockerization
+- [x] Dockerization
 - Analytics
 - Video Tutorials
 - Monitoring APIs
