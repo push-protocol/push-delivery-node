@@ -81,6 +81,8 @@ npm start
 
 ## Device Registration
 
+Below is the API to create a mapping between the wallet address and the device token for which the messages need to be delivered.
+
 ```
 
 curl --location --request POST 'https://<delivery_node_url>/apis/v1/pushtokens/register' \
