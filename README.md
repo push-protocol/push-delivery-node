@@ -7,6 +7,7 @@ The Delivery node can be hosted separately by third-party customers and hackers 
 - MYSQL (Version >= 5.7)
 - Redis (Version >= 6.0)
 - Docker (For local setup)
+- Google FCM Account Setup
 
 
 ## Environment Configuration
