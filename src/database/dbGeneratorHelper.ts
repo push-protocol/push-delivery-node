@@ -98,7 +98,7 @@ module.exports = {
     generateTablePushTokens: async function (logger) {
         const query = `CREATE TABLE IF NOT EXISTS pushtokens (
       id int(11) NOT NULL AUTO_INCREMENT,
-      wallet varchar(42) NOT NULL,
+      wallet varchar(255) NOT NULL,
       device_token varchar(255) NOT NULL,
       platform varchar(10) NOT NULL,
       timestamp timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

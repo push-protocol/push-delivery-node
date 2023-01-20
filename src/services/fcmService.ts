@@ -9,8 +9,7 @@ export default class FCMService {
     constructor() {
         var serviceAccount = require('../../firebase-adminsdk.json')
         admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount),
-            databaseURL: config.fcmDatabaseURL,
+            credential: admin.credential.cert(serviceAccount)
         })
     }
 
