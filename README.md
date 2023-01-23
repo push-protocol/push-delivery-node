@@ -13,7 +13,7 @@ The Push Delivery Node is a service that facilitates push notifications for thir
 Here is the step by step guide for setting up the delivery node.
 
 
-## Step-1: Clone Push Delivery Node repo
+## Step-1: Clone Push Delivery Node Repo
 
 ```
   git clone https://github.com/ethereum-push-notification-service/push-delivery-node.git
@@ -106,6 +106,7 @@ curl --location --request POST 'https://<delivery_node_url>/apis/v1/pushtokens/r
 - Analytics
 - Video Tutorials
 - Monitoring APIs
+- Demo APP to Test Delivery Node Notifications
 
 
 ## Note
