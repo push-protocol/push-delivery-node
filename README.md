@@ -25,8 +25,13 @@ Here is the step by step guide for setting up the delivery node.
 Refer env sample file, the MYSQL DB Credentails and Redis URL needs to be updated. The remaining conf need not be edited as of now.
 In case your using docker compose for the local setup MYSQL DB and Redis config can be left as it is.
 
+
+
 ```
-# DELIVERY NODE DATABASE
+# REDIS
+REDIS_URL=redis://localhost:6379
+
+# DELIVERY NODE MYSQL DATABASE
 
 DELIVERY_NODE_DB_HOST=localhost
 DELIVERY_NODE_DB_NAME=dbname
