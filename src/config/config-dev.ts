@@ -1,5 +1,5 @@
 export default {
-    PUSH_NODE_WEBSOCKET_URL: process.env.PUSH_NODE_WEBSOCKET_URL,
+    PUSH_NODE_WEBSOCKET_URL: "https://backend-dev.epns.io",
     REDIS_URL: process.env.REDIS_URL,
 
     /**
