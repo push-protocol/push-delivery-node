@@ -1,6 +1,6 @@
 # Push Delivery Node
 
-The Delivery node can be hosted separately by third-party customers and hackers and receive notifications from the push node.
+The Push Delivery Node is a service that facilitates push notifications for third-party customers, hackers and apps. It can be hosted separately and receives notifications from the push node.
 
 ## Prerequisites
 
@@ -10,76 +10,80 @@ The Delivery node can be hosted separately by third-party customers and hackers 
 - Google FCM Account Setup
 
 
-## Environment Configuration
+Here is the step by step guide for setting up the delivery node.
+
+
+## Step-1: Clone Push Delivery Node repo
+
+```
+  git clone https://github.com/ethereum-push-notification-service/push-delivery-node.git
+```
+
+## Step-2: Environment Configuration
+
 
 Refer env sample file, the MYSQL DB Credentails and Redis URL needs to be updated. The remaining conf need not be edited as of now.
+In case your using docker compose for the local setup MYSQL DB and Redis config can be left as it is.
 
 ```
 # DELIVERY NODE DATABASE
+
 DELIVERY_NODE_DB_HOST=localhost
 DELIVERY_NODE_DB_NAME=dbname
 DELIVERY_NODE_DB_USER=user
 DELIVERY_NODE_DB_PASS=pass
 DELIVERY_NODE_DB_PORT=3306
 
-
 ```
 
 
-## Local Setup
+## Step-3: Infra Setup - Local
 
-To start the Delivery node with MYSQL and Redis :
+The Docker compose will bring up the MYSQL, Redis and PHPMyAdmin containers for the Delivery Node to use.
 
 ```sh
 docker compose up
 ```
 
-You should then be able to build the server using:
 
-```sh
-npm install
-```
-
-You should then be able to start the server using:
-
-```sh
-npm start
-```
-
-
-
-
-## Production Setup
+## Step-3: (Alternate) Infra Setup - Production
 
 - Host MYSQL, Redis Seperately
-- Delivery node installation
 - Add MYSQL and Redis credentials in the .env file
 
-You should then be able to build the server using:
-
-```sh
-npm install
-```
-
-You should then be able to start the server using:
-
-```sh
-npm start
-```
 
 
-
-## FCM Setup
+## Step-4: FCM Project Setup
 
 - Refer https://firebase.google.com/docs/admin/setup
 - Create firebase-adminsdk.json file in the root folder and add the FCM JSON in the file
 
+## Step-5: Build the Delivery node project
+
+You should then be able to build the project using:
+
+```sh
+cd push-delivery-node
+npm install
+```
+
+## Step-6: Start the Delivery node project
+
+You should then be able to start the server using:
+
+```sh
+cd push-delivery-node
+npm start
+```
 
 
 
-## Device Registration
+## Step-7: Device Registration
 
-Below is the API to create a mapping between the wallet address and the device token for which the messages need to be delivered.
+- There is and endpoint hosted as part of the Delivery Node Project which can used for the Device Registartion.
+- Below is the API to create a mapping between the wallet address and the device token for which the messages need to be delivered.
+- <delivery_node_url> is the base URL of the Delivery node which you have hosted.
+
 
 ```
 
@@ -107,4 +111,5 @@ curl --location --request POST 'https://<delivery_node_url>/apis/v1/pushtokens/r
 ## Note
 
 The Push delivery node is  a copyrighted work owned by Push org (Ethereum Push Notification Service). Unauthorized use of the Push delivery node product for profit or by competitors is strictly prohibited. While the Push delivery node product may be used for demonstration or illustrative purposes in the context of web3, it may not be used to compete with or copy the products or services of the Push Protocol. Any violation of this disclaimer may result in legal action.
+
 
