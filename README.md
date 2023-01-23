@@ -73,7 +73,7 @@ npm start
 
 - Refer https://firebase.google.com/docs/admin/setup
 - Create firebase-adminsdk.json file in the root folder and add the FCM JSON in the file
-- Add FIREBASE_DATABASE_URL in the .env file
+
 
 
 
