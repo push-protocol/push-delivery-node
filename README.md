@@ -29,6 +29,7 @@ In case your using docker compose for the local setup MYSQL DB and Redis config 
 
 ```
 # REDIS
+
 REDIS_URL=redis://localhost:6379
 
 # DELIVERY NODE MYSQL DATABASE
