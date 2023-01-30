@@ -52,7 +52,7 @@ docker compose up
 
 ## Step-3: (Alternate) Infra Setup - Production
 
-- Host MYSQL, Redis Seperately
+- Host MYSQL and Redis seperately
 - Add MYSQL and Redis credentials in the .env file
 
 
@@ -60,7 +60,7 @@ docker compose up
 ## Step-4: FCM Project Setup
 
 - Refer https://firebase.google.com/docs/admin/setup
-- Create firebase-adminsdk.json file in the root folder and add the FCM JSON in the file
+- Create firebase-adminsdk.json file in the root folder and add the FCM JSON to this file
 
 ## Step-5: Build the Delivery node project
 
