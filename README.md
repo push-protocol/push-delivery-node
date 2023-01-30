@@ -43,7 +43,7 @@ DELIVERY_NODE_DB_PORT=3306
 
 ## Step-3: Infra Setup - Local
 
-The Docker compose will bring up the MYSQL, Redis and PHPMyAdmin containers for the Delivery Node to use.
+The docker-compose will bring up the MYSQL, Redis and PHPMyAdmin containers for the Delivery Node.
 
 ```sh
 docker compose up
