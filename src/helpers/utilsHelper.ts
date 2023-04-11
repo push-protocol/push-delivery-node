@@ -35,9 +35,17 @@ module.exports = {
   },
 
     generateMessagingPayloadFromFeed: feedPayload => {
-    let payload = {
+      for (const key in feedPayload.data) {
+        if (typeof feedPayload.data[key] === "number") {
+          feedPayload.data[key] = feedPayload.data[key].toString();
+        } 
+        else if (feedPayload.data[key] === null) {
+          feedPayload.data[key] = 'null';
+        }
+      }
+      let payload = {
       notification: feedPayload.notification,
-      data: feedPayload.data,
+      data: feedPayload.notification,
       verificationProof: feedPayload.verificationProof,
       apns: {
         payload: {
