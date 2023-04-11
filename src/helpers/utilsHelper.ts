@@ -37,6 +37,8 @@ module.exports = {
     generateMessagingPayloadFromFeed: feedPayload => {
     let payload = {
       notification: feedPayload.notification,
+      data: feedPayload.data,
+      verificationProof: feedPayload.verificationProof,
       apns: {
         payload: {
           aps: {
