@@ -32,7 +32,9 @@ export default class FeedsService {
             }
             const pushMessage = Container.get(PushMessageService)
             let count = 0
-            const msgPayload = utils.generateMessagingPayloadFromFeed(feed.payload)
+            const msgPayload = utils.generateMessagingPayloadFromFeed(
+                feed.payload
+            )
 
             while (devices.length) {
                 const deviceChunk = devices.splice(
