@@ -120,7 +120,7 @@ module.exports = {
         err: string | null
     } {
 
-        if (this.isValidNFTAddress(addressinCAIP) || this.isValidNFTAddressV2(addressinCAIP)) { 
+        if (this.isValidNFTAddress(addressinCAIP)) { 
             return { result: addressinCAIP, err: null }
         }
         let addressComponent = addressinCAIP.split(':')
