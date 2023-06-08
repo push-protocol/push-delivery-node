@@ -41,12 +41,11 @@ export default class PushTokensService {
         }
     }
 
-    async getDeviceTokens(wallets: any[]) {
+    public async getDeviceTokens(wallets: string[]):Promise<{ success: number, devices: string[] }> {
         logger.debug('Trying to convert wallets to device tokens: %o', wallets)
-        const queryClause = "('" + wallets.join("','") + "')"
         const query =
             'SELECT wallet, device_token from pushtokens WHERE wallet IN ' +
-            queryClause
+          "('" + wallets.join("','") + "')"
 
         return await new Promise((resolve, reject) => {
             db.query(query, function (err, results) {

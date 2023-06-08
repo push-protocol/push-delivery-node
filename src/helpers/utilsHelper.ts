@@ -1,6 +1,25 @@
 import { ethers } from 'ethers';
+import {FPayload} from "../services/DeliveryNode";
 
-module.exports = {
+export let generateRandomWord2 = (length, includeSpecial) => {
+  var result = ''
+  var characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  if (includeSpecial) {
+    characters =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()[]{}~<>;:-='
+  }
+  var charactersLength = characters.length
+  for (var i = 0; i < length; i++) {
+    result += characters.charAt(
+      Math.floor(Math.random() * charactersLength)
+    )
+  }
+  return result
+}
+
+
+export default {
     // To Generate Random Password
     generateRandomWord: (length, includeSpecial) => {
         var result = ''
@@ -34,7 +53,7 @@ module.exports = {
     }
   },
 
-    generateMessagingPayloadFromFeed: feedPayload => {
+    generateMessagingPayloadFromFeed: (feedPayload:FPayload) => {
       let payload = {
       notification: feedPayload.notification,
       apns: {
@@ -64,7 +83,7 @@ module.exports = {
 
     /**
      * @param addressinCAIP This address can be in the CAIP10 format (example: eip155:1:0xabc) or in the changed format eip155:0xabc (without the chainId). When this happens, the chainId will be null
-     * @returns 
+     * @returns
      */
     convertCaipToAddress: function(addressinCAIP: string): { result: string, err: string | null } {
       let addressComponent = addressinCAIP.split(":");
@@ -87,4 +106,4 @@ module.exports = {
         throw new Error("Invalid CAIP Format");
       }
   },
-}
+};

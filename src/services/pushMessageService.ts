@@ -8,14 +8,12 @@ const db = require('../database/dbHelper')
 
 @Service()
 export default class PushMessageService {
+
     // For adding or modifying info of channel
-    public async addMessage(loop_id, tokens, payload) {
-        logger.info(
-            'Adding incoming messages from feed with loop_id: ' + loop_id
-        )
+    public async addMessage(loop_id:string, tokens:string[], payload) {
+        logger.info('Adding incoming messages from feed with loop_id: ' + loop_id);
         // Need to ignore to handle the case of feeds process failing, it's a bit hacky
-        const query =
-            'INSERT IGNORE INTO pushmsg (loop_id, tokens, payload) VALUES (?, ?, ?);'
+        const query = 'INSERT IGNORE INTO pushmsg (loop_id, tokens, payload) VALUES (?, ?, ?);'
         return await new Promise(async (resolve, reject) => {
             db.query(
                 query,

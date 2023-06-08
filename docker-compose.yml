@@ -9,34 +9,34 @@ services:
       - 6379:6379
     volumes:
       - ./external/redis:/data
-  mysql:
-    image: mysql:5.7.32
-    container_name: db2
-    platform: linux/amd64
-    command: --default-authentication-plugin=mysql_native_password
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: 'pass'
-      MYSQL_DATABASE: ${DELIVERY_NODE_DB_NAME}
-      MYSQL_USER: ${DELIVERY_NODE_DB_USER}
-      MYSQL_PASSWORD: ${DELIVERY_NODE_DB_PASS}
-    ports:
-      - 3306:3306
-    # Change this to your local path
-    volumes:
-      - ./external/mysql:/var/lib/mysql/
+#  mysql:
+#    image: mysql:5.7.32
+#    container_name: db2
+#    platform: linux/amd64
+#    command: --default-authentication-plugin=mysql_native_password
+#    restart: always
+#    environment:
+#      MYSQL_ROOT_PASSWORD: 'pass'
+#      MYSQL_DATABASE: ${DELIVERY_NODE_DB_NAME}
+#      MYSQL_USER: ${DELIVERY_NODE_DB_USER}
+#      MYSQL_PASSWORD: ${DELIVERY_NODE_DB_PASS}
+#    ports:
+#      - 3306:3306
+#    # Change this to your local path
+#    volumes:
+#      - ./external/mysql:/var/lib/mysql/
 
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    depends_on:
-      - mysql
-    environment:
-      PMA_HOST: mysql
-      PMA_PORT: 3306
-      PMA_ARBITRARY: 1
-    restart: always
-    ports:
-      - 8182:80
+#  phpmyadmin:
+#    image: phpmyadmin/phpmyadmin
+#    depends_on:
+#      - mysql
+#    environment:
+#      PMA_HOST: mysql
+#      PMA_PORT: 3306
+#      PMA_ARBITRARY: 1
+#    restart: always
+#    ports:
+#      - 8182:80
 networks:
   main:
     driver: bridge

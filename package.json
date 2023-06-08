@@ -5,7 +5,7 @@
   "main": "src/app.ts",
   "scripts": {
     "build": "rimraf ./build && tsc",
-    "dev": "ts-node-dev --respawn --transpile-only ./src/app.ts",
+    "dev": "ts-node-dev --respawn --inspect=9230 --transpile-only ./src/app.ts",
     "heroku-postbuild": "npm run build",
     "start": "nodemon",
     "inspect": "nodemon --inspect src/app.ts",
@@ -19,7 +19,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ethereum-push-notification-service/push-delivery-node.git"
-  }, 
+  },
   "keywords": [
     "EPNS",
     "Delivery",

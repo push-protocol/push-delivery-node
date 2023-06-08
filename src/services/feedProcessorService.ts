@@ -4,11 +4,12 @@ import logger from '../loaders/logger'
 
 import PushTokensService from './pushTokensService'
 import PushMessageService from './pushMessageService'
+import {FData, FPayload} from "./DeliveryNode";
 var utils = require('../helpers/utilsHelper')
 
 @Service()
 export default class FeedsService {
-    public async processFeed(feed: any) {
+    public async processFeed(feed: DNFeedItem) {
         try {
             logger.debug('Process feed for sid: %o | feed: %o', feed.sid, feed)
             if (feed.users.length == 0) {
@@ -59,4 +60,13 @@ export default class FeedsService {
             logger.error(e)
         }
     }
+}
+
+// this is the object which comes from push storage node
+export class DNFeedItem {
+  sid: string;
+  payload_id: string;
+  users: string[];
+  payload: FPayload;
+  epoch: string;
 }
