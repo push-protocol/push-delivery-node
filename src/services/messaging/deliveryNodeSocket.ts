@@ -1,10 +1,11 @@
 import {Container} from 'typedi'
 import io from 'socket.io-client'
-import feedProcessorService from '../services/feedProcessorService'
-import config from '../config'
-import log from '../loaders/logger'
-import {client} from '../loaders/redis'
-import DeliveryNode, {MessageBlock} from "../services/DeliveryNode";
+import feedProcessorService from '../../services/feedProcessorService'
+import config from '../../config'
+import log from '../../loaders/logger'
+import {client} from '../../loaders/redis'
+import DeliveryNode from "./DeliveryNode";
+import {MessageBlock} from "./messageBlock";
 
 const MESSAGE_BLOCK_EVENT = "messageBlockEvent";
 const feedProcessor = Container.get(feedProcessorService);

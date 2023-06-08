@@ -3,11 +3,11 @@ import {Contract, ethers, Signer, Wallet} from "ethers";
 import fs, {readFileSync} from "fs";
 import path from "path";
 import {JsonRpcProvider} from "@ethersproject/providers/src.ts/json-rpc-provider";
-import EnvLoader from "../utilz/envLoader";
+import EnvLoader from "../../utilz/envLoader";
+import {log} from "winston";
+import StrUtil from "../../utilz/strUtil";
 import {Logger} from "winston";
-import StrUtil from "../utilz/strUtil";
 
-import log from '../loaders/logger'
 
 /*
 Validator contract abstraction.
@@ -18,35 +18,40 @@ export class ValidatorContractState {
   nodeId: string;
   wallet: Wallet;
 
+  @Inject('logger')
   private log: Logger;
 
   private contractFactory: ContractClientFactory;
   public contractCli: ValidatorCtClient;
 
   public async postConstruct() {
-    this.log = log;
-    log.info("ValidatorContractState.postConstruct()");
+    this.log.info("ValidatorContractState.postConstruct()");
     this.contractFactory = new ContractClientFactory();
-    this.contractCli = await this.contractFactory.buildRWClient(log);
+    this.contractCli = await this.contractFactory.buildRWClient(this.log);
     await this.contractCli.connect();
-    this.log.info("loaded %o ", this.contractCli.vNodesMap);
+    this.log.info("loaded %o ", this.contractCli.nodeMap);
     this.wallet = this.contractFactory.nodeWallet;
     this.nodeId = this.wallet.address;
     if (!this.wallet) throw new Error("wallet is not loaded");
-    if (this.contractCli.vNodesMap == null) throw new Error("Nodes are not initialized");
+    if (this.contractCli.nodeMap == null) throw new Error("Nodes are not initialized");
   }
 
   public isActiveValidator(nodeId: string): boolean {
-    let vi = this.contractCli.vNodesMap.get(nodeId);
+    let vi = this.contractCli.nodeMap.get(nodeId);
     return vi != null;
   }
 
-  public getAllValidatorsMap(): Map<string, NodeInfo> {
-    return this.contractCli.vNodesMap;
+  public getAllNodesMap(): Map<string, NodeInfo> {
+    return this.contractCli.nodeMap;
   }
 
   public getAllValidators(): NodeInfo[] {
-    return Array.from(this.getAllValidatorsMap().values());
+    let allNodes = Array.from(this.getAllNodesMap().values());
+    let onlyGoodValidators = allNodes.filter(ni => ni.nodeType == NodeType.VNode &&
+      (ni.nodeStatus == NodeStatus.OK
+        || ni.nodeStatus == NodeStatus.Reported
+        || ni.nodeStatus == NodeStatus.Slashed))
+    return onlyGoodValidators;
   }
 }
 
@@ -112,9 +117,7 @@ export class ValidatorCtClient {
   private log: Logger;
 
   // contract state
-  vNodesMap: Map<string, NodeInfo> = new Map<string, NodeInfo>();
-  dNodesMap: Map<string, NodeInfo> = new Map<string, NodeInfo>();
-  sNodesMap: Map<string, NodeInfo> = new Map<string, NodeInfo>();
+  nodeMap: Map<string, NodeInfo> = new Map<string, NodeInfo>();
   public attestersRequired: number;
   public nodeRandomMinCount: number;
   public nodeRandomPingCount: number;
@@ -125,43 +128,43 @@ export class ValidatorCtClient {
     this.log = log;
   }
 
-  async loadConstants() {
+  private async loadConstants() {
     {
       this.attestersRequired = await this.contract.attestersRequired();
-      log.info(`attestersRequired=${this.attestersRequired}`);
+      this.log.info(`attestersRequired=${this.attestersRequired}`);
       if (this.attestersRequired == null) {
         throw new Error('attestersRequired is undefined');
       }
       this.contract.on("AttestersRequiredUpdated",
         (value: number) => {
           this.attestersRequired = value;
-          log.info(`attestersRequired=${this.attestersRequired}`);
+          this.log.info(`attestersRequired=${this.attestersRequired}`);
         });
     }
 
     {
       this.nodeRandomMinCount = await this.contract.nodeRandomMinCount();
-      log.info(`nodeRandomMinCount=${this.nodeRandomMinCount}`);
+      this.log.info(`nodeRandomMinCount=${this.nodeRandomMinCount}`);
       if (this.nodeRandomMinCount == null) {
         throw new Error('nodeRandomMinCount is undefined');
       }
       this.contract.on("NodeRandomMinCountUpdated",
         (value: number) => {
           this.nodeRandomMinCount = value;
-          log.info(`nodeRandomMinCount=${this.nodeRandomMinCount}`);
+          this.log.info(`nodeRandomMinCount=${this.nodeRandomMinCount}`);
         });
     }
 
     {
       this.nodeRandomPingCount = await this.contract.nodeRandomPingCount();
-      log.info(`nodeRandomPingCount=${this.nodeRandomPingCount}`);
+      this.log.info(`nodeRandomPingCount=${this.nodeRandomPingCount}`);
       if (this.nodeRandomPingCount == null) {
         throw new Error('nodeRandomPingCount is undefined');
       }
       this.contract.on("NodeRandomPingCountUpdated",
         (value: number) => {
           this.nodeRandomPingCount = value;
-          log.info(`nodeRandomPingCount=${this.nodeRandomPingCount}`);
+          this.log.info(`nodeRandomPingCount=${this.nodeRandomPingCount}`);
         });
     }
   }
@@ -171,40 +174,41 @@ export class ValidatorCtClient {
     let result = this.loadNodesFromEnv();
     if (result != null) {
       // we have a debug variable set; no need to do blockchain
-      this.vNodesMap = result;
+      this.nodeMap = result;
       return;
     }
-    result = new Map<string, NodeInfo>();
     const nodeAddresses = await this.contract.getNodes();
     for (const nodeAddress of nodeAddresses) {
-      let nodeInfo = await this.contract.getNodeInfo(nodeAddress);
-      const vi = new NodeInfo(nodeInfo.nodeWallet, nodeInfo.nodeApiBaseUrl);
-      result.set(nodeInfo.nodeWallet, vi);
+      let ctObj = await this.contract.getNodeInfo(nodeAddress);
+      this.nodeMap.set(ctObj.nodeWallet,
+        new NodeInfo(ctObj.nodeWallet, ctObj.nodeApiBaseUrl, ctObj.nodeType, NodeStatus.OK));
     }
-    console.log(result);
-    this.vNodesMap = new Map<string, NodeInfo>();
+    this.log.info('contract nodes loaded %o', this.nodeMap);
+
 
     this.contract.on("NodeAdded",
       (ownerWallet: string, nodeWallet: string, nodeType: number, nodeTokens: number,
        nodeApiBaseUrl: string) => {
-        console.log("NodeAdded", arguments)
-        console.log("NodeAdded", ownerWallet, nodeWallet, nodeType, nodeTokens, nodeApiBaseUrl);
-        this.vNodesMap.set(nodeWallet, new NodeInfo(nodeWallet, nodeApiBaseUrl));
-        console.log("ValidatorMap:", this.vNodesMap);
+        this.log.info("NodeAdded %o", arguments)
+        this.log.info("NodeAdded %s %s %s %s %s", ownerWallet, nodeWallet, nodeType, nodeTokens, nodeApiBaseUrl);
+        this.nodeMap.set(nodeWallet, new NodeInfo(nodeWallet, nodeApiBaseUrl, nodeType, NodeStatus.OK));
+        this.log.info("ValidatorMap: %o", this.nodeMap);
       });
 
     this.contract.on("NodeStatusChanged",
       (nodeWallet: string, nodeStatus: number, nodeTokens: number) => {
-        console.log("NodeStatusChanged", arguments)
-        console.log("NodeStatusChanged", nodeWallet, nodeStatus, nodeTokens);
-        if (nodeStatus == NodeStatus.BannedAndUnstaked ||
-          nodeStatus == NodeStatus.Unstaked) {
-          this.vNodesMap.delete(nodeWallet);
+        this.log.info("NodeStatusChanged", arguments)
+        this.log.info("NodeStatusChanged", nodeWallet, nodeStatus, nodeTokens);
+        let ni = this.nodeMap.get(nodeWallet);
+        if (ni == null) {
+          this.log.error(`unknown node ${nodeWallet}`);
+          return;
         }
+        ni.nodeStatus = nodeStatus;
       });
   }
 
-  public loadNodesFromEnv(): Map<string, NodeInfo> | null {
+  private loadNodesFromEnv(): Map<string, NodeInfo> | null {
     let testValidatorsEnv = process.env.VALIDATOR_CONTRACT_TEST_VALIDATORS;
     if (testValidatorsEnv) {
       // test mode
@@ -221,8 +225,9 @@ export class ValidatorCtClient {
   }
 }
 
+
 // from smart contract
-enum NodeStatus {
+export enum NodeStatus {
   OK,
   Reported,
   Slashed,
@@ -233,10 +238,20 @@ enum NodeStatus {
 export class NodeInfo {
   nodeId: string;
   url: string;
+  nodeType: NodeType;
+  nodeStatus:NodeStatus;
 
 
-  constructor(nodeId: string, url: string) {
+  constructor(nodeId: string, url: string, nodeType: NodeType, nodeStatus:NodeStatus) {
     this.nodeId = nodeId;
     this.url = url;
+    this.nodeType = nodeType;
+    this.nodeStatus = nodeStatus;
   }
+}
+
+export enum NodeType {
+  VNode = 0, // validator 0
+  SNode = 1, // storage 1
+  DNode = 2  // delivery 2
 }

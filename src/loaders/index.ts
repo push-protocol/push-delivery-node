@@ -3,7 +3,7 @@ import dependencyInjectorLoader from './dependencyInjector'
 import logger from './logger'
 import initializer from './initializer'
 import dbLoader from './db'
-import deliveryNodeSocketListener from '../sockets/deliveryNodeSocket'
+import deliveryNodeSocketListener from '../services/messaging/deliveryNodeSocket'
 import jobsLoader from './jobs'
 import redisLoader from './redis'
 
