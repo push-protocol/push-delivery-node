@@ -34,21 +34,22 @@ export default async () => {
       RECONNECTION_DELAY_MAX,
       new Date(Number(pushNodeUnreachableFrom))
     );
-  })
+  });
 
   socket.on('disconnect', function () {
-    log.error('!!!! Push node socket connection dropped. !!!!')
-  })
+    log.error('!!!! Push node socket connection dropped. !!!!');
+  });
 
   socket.on(MESSAGE_BLOCK_EVENT, async (mb: MessageBlock) => {
+    log.info('message block event: %o', mb);
     const res = deliveryNode.checkBlock(mb);
     if (!res.success) {
       log.error('error ' + res.err);
       return;
     }
     await deliveryNode.sendBlock(mb);
-    log.info('message block successfully sent: ', mb)
-  })
+    log.info('message block successfully sent: ', mb);
+  });
 
 }
 

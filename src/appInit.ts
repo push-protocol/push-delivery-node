@@ -3,6 +3,8 @@ import express from 'express'
 import chalk from 'chalk'
 import {Container} from "typedi";
 import logger from "./loaders/logger";
+import {ValidatorContractState} from "./services/messaging/validatorContractState";
+import DeliveryNode from "./services/messaging/DeliveryNode";
 
 let server = null
 
@@ -38,6 +40,11 @@ async function startServer(logLevel: string = null, testMode: boolean = false) {
         process.exit(1)
     }
     Container.set("logger", logger);
+
+    let dn = Container.get(DeliveryNode);
+    dn.postConstruct();
+
+
     // Check environment setup first
     Logger.info('✌️   Verifying ENV')
     const EnvVerifierLoader = (await require('./loaders/envVerifier')).default

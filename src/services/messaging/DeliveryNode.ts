@@ -23,7 +23,11 @@ export default class DeliveryNode {
   private pushTokenService: PushTokensService
 
   @Inject()
-  private pushMessageService: PushMessageService
+  private pushMessageService: PushMessageService;
+
+  public async postConstruct() {
+    await this.contract.postConstruct();
+  }
 
   public checkBlock(block: MessageBlock): CheckResult {
     if (block.requests.length != block.responses.length) {
