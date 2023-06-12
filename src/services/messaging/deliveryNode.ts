@@ -4,7 +4,7 @@ import PushTokensService from '../pushTokensService'
 import PushMessageService from '../pushMessageService'
 import StrUtil from "../../utilz/strUtil";
 import {EthSig} from "../../utilz/ethSig";
-import {ValidatorContractState} from "./validatorContractState";
+import {ValidatorContract} from "./validatorContract";
 import {Logger} from "winston";
 import utils from "../../helpers/utilsHelper";
 import logger from "../../loaders/logger";
@@ -14,7 +14,7 @@ import {FeedItemSig, MessageBlock, NetworkRole} from "./messageBlock";
 export default class DeliveryNode {
 
   @Inject()
-  private contract: ValidatorContractState;
+  private contract: ValidatorContract;
 
   @Inject('logger')
   private log: Logger;

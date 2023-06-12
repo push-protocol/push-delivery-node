@@ -14,7 +14,7 @@ Validator contract abstraction.
 All blockchain goes here
  */
 @Service()
-export class ValidatorContractState {
+export class ValidatorContract {
   nodeId: string;
   wallet: Wallet;
 
@@ -25,7 +25,7 @@ export class ValidatorContractState {
   public contractCli: ValidatorCtClient;
 
   public async postConstruct() {
-    this.log.info("ValidatorContractState.postConstruct()");
+    this.log.info("ValidatorContract.postConstruct()");
     this.contractFactory = new ContractClientFactory();
     this.contractCli = await this.contractFactory.buildRWClient(this.log);
     await this.contractCli.connect();

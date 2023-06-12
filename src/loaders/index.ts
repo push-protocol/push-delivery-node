@@ -3,7 +3,6 @@ import dependencyInjectorLoader from './dependencyInjector'
 import logger from './logger'
 import initializer from './initializer'
 import dbLoader from './db'
-import deliveryNodeSocketListener from '../services/messaging/deliveryNodeSocket'
 import jobsLoader from './jobs'
 import redisLoader from './redis'
 
@@ -35,6 +34,5 @@ export default async ({ expressApp }) => {
     logger.info('✔️   Express loaded!')
 
     logger.info('✌️   Loading PushNodeListener!')
-    await deliveryNodeSocketListener()
     logger.info('✔️   PushNodeListener loaded!')
 }
