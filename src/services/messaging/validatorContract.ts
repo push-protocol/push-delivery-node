@@ -239,14 +239,19 @@ export class NodeInfo {
   nodeId: string;
   url: string;
   nodeType: NodeType;
-  nodeStatus:NodeStatus;
+  nodeStatus: NodeStatus;
 
 
-  constructor(nodeId: string, url: string, nodeType: NodeType, nodeStatus:NodeStatus) {
+  constructor(nodeId: string, url: string, nodeType: NodeType, nodeStatus: NodeStatus) {
     this.nodeId = nodeId;
     this.url = url;
     this.nodeType = nodeType;
     this.nodeStatus = nodeStatus;
+  }
+
+  static isValidValidator(ni: NodeInfo): boolean {
+    return ni!=null && !StrUtil.isEmpty(ni.url) && ni.nodeType == NodeType.VNode &&
+      (ni.nodeStatus == NodeStatus.OK || ni.nodeStatus == NodeStatus.Reported || ni.nodeStatus == NodeStatus.Slashed)
   }
 }
 

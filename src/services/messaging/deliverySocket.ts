@@ -7,6 +7,8 @@ import {MessageBlock} from "./messageBlock";
 import {Logger} from "winston";
 import PushTokensService from "../pushTokensService";
 import PushMessageService from "../pushMessageService";
+import {NodeInfo, NodeType, ValidatorContract} from "./validatorContract";
+
 
 @Service()
 export default class DeliverySocket {
@@ -25,18 +27,38 @@ export default class DeliverySocket {
   @Inject()
   private deliveryNode: DeliveryNode;
 
+  @Inject()
+  private validatorContract: ValidatorContract;
+
+  private validatorSocketMap: Map<string, ValidatorSocket> = new Map<string, ValidatorSocket>();
 
   public async postConstruct() {
-    const socket = io.connect(config.PUSH_NODE_WEBSOCKET_URL, {
+    for (const ni of this.validatorContract.getAllValidators()) {
+      if (NodeInfo.isValidValidator(ni)) {
+        await this.connect(ni);
+      }
+    }
+  }
+
+  public async connect(ni: NodeInfo) {
+    this.log.info(`connecting to validator ${ni.nodeId} , url: ${ni.url}`);
+    const socket = io.connect(ni.url, {
       reconnectionDelayMax: DeliverySocket.RECONNECTION_DELAY_MAX,
       reconnectionDelay: DeliverySocket.RECONNECTION_DELAY,
       query: {
-        mode: 'MESSAGE_BLOCK', // todo protocol="DNODE1.0"
+        mode: 'MESSAGE_BLOCK',
+        clientType: NodeType.DNode, // todo handle
+        clientVer: "1.0"            // todo handle
       },
-    })
+    });
+    let validatorSocket = new ValidatorSocket();
+    validatorSocket.socket = socket;
+    validatorSocket.nodeId = ni.nodeId;
+    this.validatorSocketMap.set(ni.nodeId, validatorSocket)
 
     socket.on('connect', async () => {
-      this.log.info('CONNECTED TO VALIDATOR NODE');
+      this.log.info(`>connected to validator ${ni.nodeId} , url: ${ni.url}`);
+
     })
 
     socket.on('connect_error', async () => {
@@ -62,4 +84,8 @@ export default class DeliverySocket {
   }
 }
 
+class ValidatorSocket {
+  socket: any;
+  nodeId: string;
+}
 
