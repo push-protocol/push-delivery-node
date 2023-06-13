@@ -29,6 +29,7 @@ export default class DeliveryNode {
     await this.contract.postConstruct();
   }
 
+  // todo move to common
   public checkBlock(block: MessageBlock): CheckResult {
     if (block.requests.length != block.responses.length) {
       return CheckResult.failWithText(`message block has incorrect length ${block.requests.length}!=${block.responses.length}`);

@@ -250,7 +250,7 @@ export class NodeInfo {
   }
 
   static isValidValidator(ni: NodeInfo): boolean {
-    return ni!=null && !StrUtil.isEmpty(ni.url) && ni.nodeType == NodeType.VNode &&
+    return ni != null && !StrUtil.isEmpty(ni.url) && ni.nodeType == NodeType.VNode &&
       (ni.nodeStatus == NodeStatus.OK || ni.nodeStatus == NodeStatus.Reported || ni.nodeStatus == NodeStatus.Slashed)
   }
 }

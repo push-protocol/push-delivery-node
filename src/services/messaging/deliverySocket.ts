@@ -1,7 +1,6 @@
 import {Container, Inject, Service} from 'typedi'
 import io from 'socket.io-client'
 import config from '../../config'
-import log from '../../loaders/logger'
 import DeliveryNode from "./deliveryNode";
 import {MessageBlock} from "./messageBlock";
 import {Logger} from "winston";
@@ -75,7 +74,7 @@ export default class DeliverySocket {
       this.log.info('message block event: %o', mb);
       const res = this.deliveryNode.checkBlock(mb);
       if (!res.success) {
-        log.error('error ' + res.err);
+        this.log.error('error ' + res.err);
         return;
       }
       await this.deliveryNode.sendBlock(mb);

@@ -3,7 +3,6 @@ import express from 'express'
 import chalk from 'chalk'
 import {Container} from "typedi";
 import logger from "./loaders/logger";
-import {ValidatorContract} from "./services/messaging/validatorContract";
 import DeliveryNode from "./services/messaging/deliveryNode";
 import DeliverySocket from "./services/messaging/deliverySocket";
 
@@ -40,14 +39,10 @@ async function startServer(logLevel: string = null, testMode: boolean = false) {
         )
         process.exit(1)
     }
-    Container.set("logger", logger);
 
-    let dn = Container.get(DeliveryNode);
-    await dn.postConstruct();
-
-    let ds = Container.get(DeliverySocket);
-    await ds.postConstruct();
-
+  Container.set("logger", logger);
+  await Container.get(DeliveryNode).postConstruct();
+  await Container.get(DeliverySocket).postConstruct();
 
     // Check environment setup first
     Logger.info('✌️   Verifying ENV')
