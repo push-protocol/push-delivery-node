@@ -1,6 +1,7 @@
 export default {
-    PUSH_NODE_WEBSOCKET_URL: "https://backend-dev.epns.io",
+    PUSH_NODE_WEBSOCKET_URL: "ws://localhost:4000",
     REDIS_URL: process.env.REDIS_URL,
+    CHANNEL_ADDRESSES: [],
 
     /**
      *   Messaging related
