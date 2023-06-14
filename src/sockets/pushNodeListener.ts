@@ -31,7 +31,6 @@ export default async () => {
 
     socket.on('connect', async () => {
         logger.info(artwork.getPushNodeConnectionArtWork(socket))
-
         pushNodeUnreachableFrom = await client.get(
             PUSH_NODE_UNREACHABLE_FROM_REDIS_KEY
         )
