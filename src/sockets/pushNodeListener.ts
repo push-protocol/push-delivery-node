@@ -4,7 +4,6 @@ import feedProcessorService from '../services/feedProcessorService'
 import config from '../config'
 import logger from '../loaders/logger'
 import { client } from '../loaders/redis'
-import { sensitiveHeaders } from 'http2'
 
 var artwork = require('../helpers/artwork')
 
