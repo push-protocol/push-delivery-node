@@ -31,7 +31,6 @@ export default async () => {
 
     socket.on('connect', async () => {
         logger.info(artwork.getPushNodeConnectionArtWork(socket))
-
         pushNodeUnreachableFrom = await client.get(
             PUSH_NODE_UNREACHABLE_FROM_REDIS_KEY
         )
@@ -126,7 +125,11 @@ export default async () => {
     })
 
     socket.on(LIVE_FEED_EVENT, async (feed) => {
-        await feedProcessor.processFeed(feed)
+        // if the array is empty or it is present in the array in either noncaip or caip format, processs the feed 
+        if ((config.CHANNEL_ADDRESSES.length == 0) || (Object.keys(feed).includes('sender') && config.CHANNEL_ADDRESSES.some((channel) => {
+            return feed.sender.toLowerCase().includes(channel.toLowerCase())
+        })))
+            await feedProcessor.processFeed(feed)
     })
 
     socket.on('disconnect', function () {
@@ -194,7 +197,10 @@ export default async () => {
             )
 
             for (let i = 0; i < data['feeds'].length; i++) {
-                await feedProcessor.processFeed(data['feeds'][i])
+                if ((config.CHANNEL_ADDRESSES.length == 0) || (Object.keys(data['feeds']).includes('sender') && config.CHANNEL_ADDRESSES.some((channel) => {
+                    return data['feeds'].sender.toLowerCase().includes(channel.toLowerCase())
+                })))
+                    await feedProcessor.processFeed(data['feeds'][i])
             }
 
             feedsRequest.page += 1

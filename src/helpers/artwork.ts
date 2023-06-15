@@ -24,6 +24,8 @@ module.exports = {
 
         🛡️  Server listening on url :: ${config.PUSH_NODE_WEBSOCKET_URL}  Socket id :: ${socket.id}🛡️
 
+        🔔 Delivery Node will deliver notifications for ${config.CHANNEL_ADDRESSES.length>0? config.CHANNEL_ADDRESSES: "all" } channels  🔔
+
         ################################################
         `
     },
