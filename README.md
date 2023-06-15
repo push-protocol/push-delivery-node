@@ -19,7 +19,7 @@ Here is the step by step guide for setting up the delivery node.
   git clone https://github.com/ethereum-push-notification-service/push-delivery-node.git
 ```
 
-## Step-2: Environment Configuration
+## Step-2: Environment Variables and `config` File Configuration 
 
 
 Refer env sample file. The MYSQL DB credentials and Redis URL needs to be updated. The remaining conf need not be edited as of now. In case your using docker-compose for the local setup MYSQL DB and Redis config can be left as it is.
@@ -40,6 +40,21 @@ DELIVERY_NODE_DB_PORT=3306
 
 ```
 
+As per the environments, there are three config files:
+
+`config-staging` for staging environment
+
+`config-prod` for production environment
+
+In the `.env.`, the value of `DELIVERY_NODES_NET` determines the config file that will be used. The `CHANNEL_ADDRESS` parameter in the config files specifies which channel's notification will be delivered. Therefore, the user has the option to deliver notifications for either a subset of channels or for all channels. 
+
+There are three level of conditioning that can be made in the config:
+
+For better understanding, we will consider an example where Ethereum channel address is `0xEth` and it's alias(same as channel address) is in Polygon. The channel in caip format will be `eip155:1:0xEth` and the alias in caip format will be `eip155:137:0xEth`.
+
+1. empty array: If the array is empty, all of the channels' notifications will be delivered. In this case `CHANNEL ADDRESSES = []`
+2. channel address with no CAIP format: If the user wants to deliver notifications for both the channel and it's alias, then can enter the address without any CAIP. In this case `CHANNEL ADDRESSES = [0xEth]`
+3. channel address with no CAIP format: If the user wants to deliver notifications for only the Ethereum channel or the alias channel, they can specify it in the CAIP format of that specific chain. In this case, for delivering Ethereum channel's notification, it will be  `CHANNEL ADDRESSES = [eip155:1:0xEth]` and for delivering Polygon alias channel's notification, it will be `CHANNEL ADDRESSES = [eip155:137:0xEth]`
 
 ## Step-3: Infra Setup - Local
 
