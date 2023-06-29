@@ -11,9 +11,26 @@ export default class FeedsService {
     public async processFeed(feed: any) {
         try {
             logger.debug('Process feed for sid: %o | feed: %o', feed.sid, feed)
-            if (feed.users.length == 0) {
+            if (feed.users.length === 0) {
                 logger.info(
                     'The Feed contains empty tokens, hence skipping the feed with sid :: %o ',
+                    feed.sid
+                )
+                return
+            }
+            /**
+             * BY DEFAULT DELIVERY NODES SKIP SPAM AND SILENT NOTIFICATIONS
+             */
+            if (feed.is_spam == 1) {
+                logger.info(
+                    'Spam Feed, hence skipping the feed with sid :: %o ',
+                    feed.sid
+                )
+                return
+            }
+            if (feed.payload.data.silent == 1) {
+                logger.info(
+                    'Silent Feed, hence skipping the feed with sid :: %o ',
                     feed.sid
                 )
                 return
