@@ -4,17 +4,24 @@ import PushTokensService from '../pushTokensService'
 import PushMessageService from '../pushMessageService'
 import StrUtil from "../../utilz/strUtil";
 import {EthSig} from "../../utilz/ethSig";
-import {ValidatorContract} from "./validatorContract";
+import {ValidatorContractState} from "./validatorContractState";
 import {Logger} from "winston";
 import utils from "../../helpers/utilsHelper";
 import logger from "../../loaders/logger";
-import {FeedItemSig, MessageBlock, NetworkRole} from "./messageBlock";
+import {FeedItemSig, MessageBlock, MessageBlockUtil, NetworkRole} from "./messageBlock";
+import {QueueClient} from "../dset/queueClient";
+import {Consumer, QItem} from "../dset/queueTypes";
+import {BlockStorage} from "./BlockStorage";
 
+/*
+todo Delete data older than 6months!
+todo Listen to every contract change, not on startup
+ */
 @Service()
-export default class DeliveryNode {
+export default class DeliveryNode implements Consumer<QItem> {
 
   @Inject()
-  private contract: ValidatorContract;
+  private contract: ValidatorContractState;
 
   @Inject('logger')
   private log: Logger;
@@ -25,62 +32,57 @@ export default class DeliveryNode {
   @Inject()
   private pushMessageService: PushMessageService;
 
+  @Inject()
+  private blockStorage: BlockStorage;
+
+  private client: QueueClient;
+
   public async postConstruct() {
     await this.contract.postConstruct();
+
   }
 
-  // todo move to common
-  public checkBlock(block: MessageBlock): CheckResult {
-    if (block.requests.length != block.responses.length) {
-      return CheckResult.failWithText(`message block has incorrect length ${block.requests.length}!=${block.responses.length}`);
+
+  // remote queue handler
+  async accept(item: QItem): Promise<boolean> {
+    // check hash
+    let mb = <MessageBlock>item.object;
+    let calculatedHash = MessageBlockUtil.calculateHash(mb);
+    if (calculatedHash !== item.object_hash) {
+      this.log.error('received item hash=%s , ' +
+        'which differs from calculatedHash=%s, ' +
+        'ignoring the block because producer calculated the hash incorrectly',
+        item.object_hash, calculatedHash);
+      return false;
     }
-    let blockValidatorNodeId = null;
-    let item0sig0 = block.responsesSignatures[0][0];
-    if (item0sig0?.nodeMeta.role != NetworkRole.VALIDATOR
-      || StrUtil.isEmpty(item0sig0?.nodeMeta.nodeId)) {
-      return CheckResult.failWithText('first signature is not performed by a validator');
+    // check contents
+    // since this check is not for historical data, but for realtime data,
+    // so we do not care about old blocked validators which might occur in the historical queue
+    let activeValidators = new Set(this.contract.getActiveValidators().map(v => v.nodeId));
+    let check1 = MessageBlockUtil.checkBlock(mb, activeValidators);
+    if (!check1.success) {
+      this.log.error('item validation failed: ', check1.err);
+      return false;
     }
-    let result: FeedItemSig[] = [];
-    for (let i = 0; i < block.responses.length; i++) {
-      let payloadItem = block.requests[i];
-      let feedItem = block.responses[i];
-      // check signatures
-      let feedItemSignatures = block.responsesSignatures[i];
-      for (let j = 0; j < feedItemSignatures.length; j++) {
-        let fiSig = feedItemSignatures[j];
-        if (j == 0) {
-          if (fiSig.nodeMeta.role != NetworkRole.VALIDATOR) {
-            return CheckResult.failWithText(`First signature on a feed item should be  ${NetworkRole.VALIDATOR}`);
-          }
-        } else {
-          if (fiSig.nodeMeta.role != NetworkRole.ATTESTER) {
-            return CheckResult.failWithText(`2+ signature on a feed item should be  ${NetworkRole.ATTESTER}`);
-          }
-        }
-        const valid = EthSig.check(fiSig.signature, fiSig.nodeMeta.nodeId, fiSig.nodeMeta, feedItem);
-        if (!valid) {
-          return CheckResult.failWithText(`signature is not valid`);
-        } else {
-          this.log.debug('valid signature %o', fiSig);
-        }
-        const validNodeId = this.contract.isActiveValidator(fiSig.nodeMeta.nodeId);
-        if (!validNodeId) {
-          return CheckResult.failWithText(`${fiSig.nodeMeta.nodeId} is not a valid nodeId from a contract`);
-        } else {
-          this.log.debug('valid nodeId %o', fiSig.nodeMeta.nodeId);
-        }
-      }
+    // check database
+    let isNew = await this.blockStorage.accept(item);
+    if(!isNew) {
+      // this is not an error, because we read duplicates from every validator
+      this.log.debug('block %s already exists ', mb.id);
+      return false;
     }
-    return CheckResult.ok();
+    // send block
+    await this.sendBlock(mb);
   }
 
   // sends the block contents (internal messages from every response)
   // to every recipient specified in the header
-  public async sendBlock(mb: MessageBlock) {
-    for (const fi of mb.responses) {
+  public async sendBlock(mb: Readonly<MessageBlock>) {
+    for (let i = 0; i < mb.responses.length; i++) {
+      const fi = mb.responses[i];
       let header = fi.header;
       let payload = fi.payload;
-      let targetWallets = header.recipients;
+      let targetWallets = MessageBlockUtil.calculateRecipients(mb, i)
       const deviceLookup = await this.pushTokenService.getDeviceTokens(targetWallets)
       const devices = deviceLookup.devices;
       if (devices.length == 0) {
@@ -101,6 +103,7 @@ export default class DeliveryNode {
       }
     }
   }
+
 }
 
 

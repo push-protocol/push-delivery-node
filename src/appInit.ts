@@ -42,8 +42,6 @@ async function startServer(logLevel: string = null, testMode: boolean = false) {
 
   Container.set("logger", logger);
   await Container.get(DeliveryNode).postConstruct();
-  await Container.get(DeliverySocket).postConstruct();
-
     // Check environment setup first
     Logger.info('✌️   Verifying ENV')
     const EnvVerifierLoader = (await require('./loaders/envVerifier')).default

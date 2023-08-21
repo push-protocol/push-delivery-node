@@ -2,7 +2,7 @@ import winston from 'winston'
 import config from '../config'
 const moment = require('moment')
 
-const customLevels = {
+export const customLevels = {
     levels: {
         error: 0,
         warn: 1,
@@ -64,11 +64,15 @@ const formatter = winston.format.combine(
 )
 
 const transports = []
+
+export let consoleTransport = new winston.transports.Console({
+  format: formatter,
+});
+
+export let jsonLogTransport = new winston.transports.File(options.file);
 transports.push(
-    new winston.transports.Console({
-        format: formatter,
-    }),
-    new winston.transports.File(options.file)
+  consoleTransport,
+  jsonLogTransport
 )
 
 const LoggerInstance = winston.createLogger({
