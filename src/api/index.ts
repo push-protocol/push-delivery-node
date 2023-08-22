@@ -1,9 +1,14 @@
 import { Router } from 'express'
 import pushtokens from './routes/pushtokens'
 import logger from '../loaders/logger'
+import {ExpressUtil} from "../utilz/expressUtil";
+import {EnvLoader} from "../utilz/envLoader";
 
 export default () => {
-    const app = Router()
+    const app = Router();
+    if (EnvLoader.getPropertyAsBool('VALIDATOR_HTTP_LOG')) {
+      app.use(ExpressUtil.handle)
+    }
     pushtokens(app)
     app.use((req, res, next) => {
         res.setHeader('Content-Type', 'text/html')

@@ -4,8 +4,8 @@ import {Logger} from 'winston'
 import schedule from 'node-schedule'
 import {ValidatorContractState} from '../messaging/validatorContractState'
 import {WinstonUtil} from '../../utilz/winstonUtil'
-import {QueueServer} from '../dset/queueServer'
-import {QueueClient} from '../dset/queueClient'
+import {QueueServer} from '../messaging-dset/queueServer'
+import {QueueClient} from '../messaging-dset/queueClient'
 import DeliveryNode from "./deliveryNode";
 
 
@@ -15,7 +15,7 @@ export class QueueInitializerDelivery {
 
   @Inject((type) => ValidatorContractState)
   private contractState: ValidatorContractState;
-  @Inject()
+  @Inject(type => DeliveryNode)
   private deliveryNode:DeliveryNode;
 
 
@@ -35,7 +35,7 @@ export class QueueInitializerDelivery {
   public async postConstruct() {
     this.log.debug('postConstruct')
     this.mblockClient = new QueueClient(this.deliveryNode, QueueInitializerDelivery.QUEUE_MBLOCK)
-    await this.initClientForEveryQueueForEveryValidator()
+    await this.initClientForEveryQueueForEveryValidator([QueueInitializerDelivery.QUEUE_MBLOCK])
     const qs = this
     schedule.scheduleJob(this.CLIENT_READ_SCHEDULE, async function () {
       const dbgPrefix = 'PollRemoteQueue'
@@ -51,13 +51,10 @@ export class QueueInitializerDelivery {
   }
 
   // updates the dset_client table used for queries according to the contract data
-  private async initClientForEveryQueueForEveryValidator() {
-    const queueArr = await MySqlUtil.queryArr<{ queue_name: string }>(`select queue_name
-                                                                       from dset_server`)
+  private async initClientForEveryQueueForEveryValidator(queueNames:string[]) {
     const nodeId = this.contractState.nodeId
     const allValidators = this.contractState.getAllValidatorsExceptSelf()
-    for (const queueRow of queueArr) {
-      const queueName = queueRow.queue_name
+    for (const queueName of queueNames) {
       for (const nodeInfo of allValidators) {
         const targetNodeId = nodeInfo.nodeId
         const targetNodeUrl = nodeInfo.url

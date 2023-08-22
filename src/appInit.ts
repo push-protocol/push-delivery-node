@@ -4,7 +4,6 @@ import chalk from 'chalk'
 import {Container} from "typedi";
 import logger from "./loaders/logger";
 import DeliveryNode from "./services/messaging/deliveryNode";
-import DeliverySocket from "./services/messaging/deliverySocket";
 
 let server = null
 

@@ -1,7 +1,7 @@
 import { Logger } from 'winston'
-import * as dbHelper from '../helpers/dbHelper'
-import { OkPacket } from 'mysql'
+import { OkPacket, Pool } from 'mysql'
 import { WinstonUtil } from './winstonUtil'
+import { EnvLoader } from './envLoader'
 
 /*
  A sync replacement of db.query callback-y code
@@ -49,20 +49,21 @@ import { WinstonUtil } from './winstonUtil'
 export class MySqlUtil {
   private static log: Logger = WinstonUtil.newLog('mysql')
   static logSql = false
+  static pool: Pool
 
-  public static enableSQLLog() {
-    if (MySqlUtil.logSql) {
-      return
-    }
-    dbHelper.pool.on('connection', function (connection) {
-      connection.on('enqueue', function (sequence) {
-        // if (sequence instanceof mysql.Sequence.Query) {
-        if ('Query' === sequence.constructor.name) {
-          MySqlUtil.log.debug(sequence.sql)
-        }
+  public static init(pool: Pool) {
+    MySqlUtil.pool = pool
+    if (!MySqlUtil.logSql && EnvLoader.getPropertyAsBool('LOG_SQL_STATEMENTS')) {
+      pool.on('connection', function (connection) {
+        connection.on('enqueue', function (sequence) {
+          // if (sequence instanceof mysql.Sequence.Query) {
+          if ('Query' === sequence.constructor.name) {
+            MySqlUtil.log.debug(sequence.sql)
+          }
+        })
       })
-    })
-    MySqlUtil.logSql = true
+      MySqlUtil.logSql = true
+    }
     this.log.info('sql statement logging is enabled')
   }
 
@@ -87,7 +88,7 @@ export class MySqlUtil {
   }
 
   public static async queryOneValue<V>(query: string, ...sqlArgs: any[]): Promise<V | null> {
-    return await this.queryOneValueOrDefault(query, null, sqlArgs)
+    return await this.queryOneValueOrDefault(query, null, ...sqlArgs)
   }
 
   public static async queryOneRow<R>(query: string, ...sqlArgs: any[]): Promise<R | null> {
@@ -114,7 +115,7 @@ export class MySqlUtil {
 
   public static async queryArr<R>(query: string, ...sqlArgs: any[]): Promise<R[]> {
     return new Promise<[R]>((resolve, reject) => {
-      dbHelper.pool.getConnection(function (err, connection) {
+      MySqlUtil.pool.getConnection(function (err, connection) {
         if (err) {
           MySqlUtil.log.error(err)
           reject(err)

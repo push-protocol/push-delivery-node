@@ -1,6 +1,4 @@
 import {Wallet} from "ethers";
-import {Logger} from "winston";
-import {Container} from "typedi";
 import {verifyMessage} from "ethers/lib/utils";
 import {ObjectHasher} from "./objectHasher";
 
@@ -14,18 +12,22 @@ import {ObjectHasher} from "./objectHasher";
 export class EthSig {
 
     public static async create(wallet: Wallet, ...object: any[]): Promise<string> {
-        let ethMessage = ObjectHasher.hashToSha256IgnoreSig(object);
-        let sig = await wallet.signMessage(ethMessage);
+        const ethMessage = ObjectHasher.hashToSha256IgnoreSig(object);
+        const sig = await wallet.signMessage(ethMessage);
         return sig;
     }
 
     public static check(sig: string, targetWallet: string, ...object: any[]): boolean {
-        let ethMessage = ObjectHasher.hashToSha256IgnoreSig(object);
-        let verificationAddress = verifyMessage(ethMessage, sig);
+        const ethMessage = ObjectHasher.hashToSha256IgnoreSig(object);
+        const verificationAddress = verifyMessage(ethMessage, sig);
         if (targetWallet !== verificationAddress) {
             return false;
         }
         return true;
+    }
+
+    public static isEthZero(addr: string) {
+        return '0x0000000000000000000000000000000000000000' === addr
     }
 }
 

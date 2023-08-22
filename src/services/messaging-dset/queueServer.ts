@@ -2,11 +2,12 @@
 // a queue, which is used to store an append only log;
 // this node: appends it - if storage says yes to a new item
 // other nodes: read this from client
-import {Logger} from 'winston'
-import {WinstonUtil} from '../../utilz/winstonUtil'
-import {MySqlUtil} from '../../utilz/mySqlUtil'
-import {Consumer, DCmd, QItem} from './queueTypes'
-import StrUtil from "../../utilz/strUtil";
+import { Logger } from 'winston'
+import { WinstonUtil } from '../../utilz/winstonUtil'
+import { MySqlUtil } from '../../utilz/mySqlUtil'
+import { Consumer, DCmd, QItem } from './queueTypes'
+import StrUtil from '../../utilz/strUtil'
+import { ObjectHasher } from '../../utilz/objectHasher'
 
 export class QueueServer implements Consumer<QItem> {
   private log: Logger = WinstonUtil.newLog(QueueServer)
@@ -14,10 +15,14 @@ export class QueueServer implements Consumer<QItem> {
   queueName: string
   storage: Consumer<QItem>
 
-  constructor(queueName: string, replyPageSize: number, storage: Consumer<QItem> | null) {
-    this.queueName = queueName
+  constructor(
+    localQueueName: string,
+    replyPageSize: number,
+    storageForDeduplication: Consumer<QItem> | null
+  ) {
+    this.queueName = localQueueName
     this.replyPageSize = replyPageSize
-    this.storage = storage
+    this.storage = storageForDeduplication
   }
 
   /**
@@ -28,24 +33,27 @@ export class QueueServer implements Consumer<QItem> {
    * @param item
    */
   public async accept(item: QItem): Promise<boolean> {
-    const cmd = item.object;
-    let valid = true;
+    const cmd = item.object
+    let valid = true
     if (this.storage != null) {
       valid = await this.storage.accept(item);
     }
     this.log.debug('[%s] try add %o', this.queueName, cmd)
     if (!valid) {
-      this.log.debug('[%s] item is already in the storage, skip adding to the queue', this.queueName);
-      return false;
+      this.log.debug(
+        '[%s] item is already in the storage, skip adding to the queue',
+        this.queueName
+      )
+      return false
     }
-    let success;
+    let success
     if (StrUtil.isEmpty(item.object_hash)) {
-      success = await this.appendDirect(cmd);
+      success = await this.appendDirect(cmd)
     } else {
-      success = await this.appendWithHashChecks(item.object, item.object_hash);
+      success = await this.appendWithHashChecks(item.object, item.object_hash)
     }
     this.log.debug('[%s] item pushed into the queue, success=%s', this.queueName, success)
-    return success;
+    return success
   }
 
   /**
@@ -66,20 +74,22 @@ export class QueueServer implements Consumer<QItem> {
       cmdStr,
       cmdHash
     )
-    return res.affectedRows === 1;
+    return res.affectedRows === 1
   }
 
   /*
     Add directly to queue
      */
   public async appendDirect(cmd: DCmd) {
-    const cmdStr = JSON.stringify(cmd)
+    const object = JSON.stringify(cmd)
+    const objectHash = ObjectHasher.hashToSha256(cmd)
     const res = await MySqlUtil.insert(
       `INSERT INTO dset_queue_${this.queueName}(object)
-       VALUES (?)`,
-      cmdStr
+       VALUES (?,?)`,
+      object,
+      objectHash
     )
-    return res.affectedRows === 1;
+    return res.affectedRows === 1
   }
 
   public async getFirstRowIdAfter(offset: number): Promise<number | null> {
@@ -92,15 +102,19 @@ export class QueueServer implements Consumer<QItem> {
   }
 
   public async readItems(offset: number): Promise<QItem[]> {
-    const rows = await MySqlUtil.queryArr<{ id: number; object: string }>(
-      `select id, object
+    const rows = await MySqlUtil.queryArr<{ id: number; object: string; object_hash: string }>(
+      `select id, object, object_hash
        from dset_queue_${this.queueName}
        where id > ?
        order by id asc
        limit ${this.replyPageSize} `,
       offset
     )
-    const items: QItem[] = rows.map((row) => ({id: row.id, object: JSON.parse(row.object)}))
+    const items: QItem[] = rows.map((row) => ({
+      id: row.id,
+      object: JSON.parse(row.object),
+      object_hash: row.object_hash
+    }))
     return items
   }
 
@@ -146,5 +160,7 @@ export class QueueServer implements Consumer<QItem> {
 }
 
 export enum QueueServerMode {
-  APPEND_TO_STORAGE_FIRST
+  APPEND_TO_STORAGE_FIRST,
+  ITEM,
+  ITEM_WITH_HASH
 }

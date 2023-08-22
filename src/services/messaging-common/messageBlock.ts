@@ -181,7 +181,7 @@ export class FeedItemSig {
 }
 
 export class FISData {
-  recipientsMissing: RecipientsMissing
+  recipientsMissing?: RecipientsMissing
 }
 
 export class RecipientsMissing {
@@ -316,7 +316,10 @@ export class MessageBlockUtil {
     const signaturesA = block.responsesSignatures[requestOffset]
     const allRecipients = CollectionUtil.arrayToMap(recipientsV, 'addr')
     for (const signatureA of signaturesA) {
-      const recipientsMissing = signatureA.data.recipientsMissing
+      const recipientsMissing = signatureA?.data?.recipientsMissing;
+      if(recipientsMissing == null) {
+        continue;
+      }
       for (const itemToRemove of recipientsMissing.recipients) {
         allRecipients.delete(itemToRemove.addr)
       }
@@ -379,7 +382,7 @@ export class MessageBlockUtil {
     const result: FeedItemSig[] = []
     for (let i = 0; i < block.responses.length; i++) {
       const payloadItem = block.requests[i]
-      const feedItem = block.responses[i]
+      const fi = block.responses[i]
       // check signatures
       const feedItemSignatures = block.responsesSignatures[i]
       for (let j = 0; j < feedItemSignatures.length; j++) {
@@ -397,9 +400,17 @@ export class MessageBlockUtil {
             )
           }
         }
-        const valid = EthSig.check(fiSig.signature, fiSig.nodeMeta.nodeId, fiSig.nodeMeta, feedItem)
+        const valid = EthSig.check(
+          fiSig.signature,
+          fiSig.nodeMeta.nodeId,
+          fi,
+          fiSig.data,
+          fiSig.nodeMeta
+        )
         if (!valid) {
-          return CheckResult.failWithText(`signature is not valid`)
+          return CheckResult.failWithText(
+            `signature is not valid: replyOffset ${i} sigOffset ${j} :   ${JSON.stringify(fiSig)} `
+          )
         } else {
           this.log.debug('valid signature %o', fiSig)
         }

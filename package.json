@@ -6,6 +6,7 @@
   "scripts": {
     "build": "rimraf ./build && tsc",
     "dev": "ts-node-dev --respawn --inspect=9230 --transpile-only ./src/app.ts",
+    "dev8000": "ts-node-dev --respawn --inspect=8000 --transpile-only ./src/app.ts",
     "heroku-postbuild": "npm run build",
     "start": "nodemon",
     "inspect": "nodemon --inspect src/app.ts",
@@ -63,7 +64,8 @@
     "ts-node-dev": "^2.0.0",
     "typedi": "^0.10.0",
     "typescript": "^4.7.4",
-    "winston": "^3.8.1"
+    "winston": "^3.8.1",
+    "ts-luxon": "^4.3.2"
   },
   "devDependencies": {
     "@types/express": "^4.17.13",

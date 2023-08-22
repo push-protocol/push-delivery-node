@@ -4,18 +4,18 @@ import { Logger } from 'winston'
 import { WinstonUtil } from '../../utilz/winstonUtil'
 import { MySqlUtil } from '../../utilz/mySqlUtil'
 import axios from 'axios'
-import {Consumer, QItem} from "./queueTypes";
+import { Consumer, QItem } from './queueTypes'
 
 export class QueueClient {
   public log: Logger = WinstonUtil.newLog(QueueClient)
   // remoteUrl: string // stored into db
   // offset: number // stored into db
-  consumer: Consumer<QItem>;
-  queueName: string;
+  consumer: Consumer<QItem>
+  queueName: string
 
-  constructor(consumer: Consumer<QItem>, queueName:string) {
-    this.consumer = consumer;
-    this.queueName = queueName;
+  constructor(consumer: Consumer<QItem>, remoteQueueName: string) {
+    this.consumer = consumer
+    this.queueName = remoteQueueName
   }
 
   /**
@@ -93,8 +93,8 @@ export class QueueClient {
     const url = `${baseUri}/apis/v1/dset/queue/${queueName}?firstOffset=${firstOffset}`
     try {
       const re = await axios.get(url, {
-        timeout: 3000,
-        signal: AbortSignal.timeout(3000)
+        timeout: 3000
+        // signal: AbortSignal.timeout(3000)
       })
       this.log.debug('readItems %s from offset %d %o', url, firstOffset, re?.data)
       const obj: { items: QItem[]; lastOffset: number } = re.data
