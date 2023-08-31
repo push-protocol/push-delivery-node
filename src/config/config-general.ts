@@ -3,7 +3,6 @@ const deliveryNodesNet = process.env.DELIVERY_NODES_NET
 const staticServeURI = 'public'
 
 export default {
-
     environment: env,
     deliveryNodesNet: deliveryNodesNet,
     port: parseInt(process.env.PORT || '7575', 10),
@@ -11,7 +10,10 @@ export default {
     logs: {
         level: process.env.LOG_LEVEL || 'debug',
     },
-
+    /**
+     * Migration version
+     */
+    migrationVersion: 1,
     /**
      * The delivery node database config
      */
@@ -20,7 +22,6 @@ export default {
     deliveryNodeDBUser: process.env.DELIVERY_NODE_DB_USER,
     deliveryNodeDBPass: process.env.DELIVERY_NODE_DB_PASS,
     deliveryNodeDBPort: process.env.DELIVERY_NODE_DB_PORT,
-
 
     staticServePath: staticServeURI,
 
@@ -36,9 +37,25 @@ export default {
 
     /**
      * API configs
-    */
+     */
     api: {
-        prefix: "/apis",
-        version: "v1"
+        prefix: '/apis',
+        version: 'v1',
+    },
+    /**
+     *  APN config
+     */
+    apnConfig: {
+        expiry: Math.floor(Date.now() / 1000) + 3600, // 1hr from now
+        badge: 1,
+        sound: 'default',
+    },
+    /**
+     * Platform enums
+     */
+    platformEnum: {
+        ios: "ios",
+        android: "android",
+        web: "web"
     }
 }

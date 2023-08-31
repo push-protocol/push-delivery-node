@@ -30,7 +30,8 @@ export default (app: Router) => {
             body: Joi.object({
                 wallet: Joi.string().required(),
                 device_token: Joi.string().required(),
-                platform: Joi.string().required()
+                platform: Joi.string().required(),
+                apn_token: Joi.string().optional()
             })
         }),
         async (req: Request, res: Response, next: NextFunction) => {
@@ -46,7 +47,8 @@ export default (app: Router) => {
                         } = await pushInstance.registerDevice(
                             req.body.wallet,
                             req.body.device_token,
-                            req.body.platform
+                            req.body.platform,
+                            req.body.apn_token
                         );
                         return res.status(204).json();
                 } else {

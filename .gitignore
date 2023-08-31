@@ -139,3 +139,4 @@ firebase-adminsdk.json
 external/
 package-lock.json
 yarn.lock
+*.p8

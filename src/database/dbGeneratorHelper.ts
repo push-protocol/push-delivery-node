@@ -8,6 +8,8 @@ module.exports = {
         await this.generateTablePushMessageArchive(logger)
         await this.generateTablePushTokens(logger)
         await this.generateTableServerTokens(logger)
+        await this.generateTableDeliverNodeMeta(logger)
+        await this.insertDefaultsInDeliveryMeta(logger)
     },
     generateDB: async function (logger) {
         const query = `CREATE DATABASE IF NOT EXISTS ${config.deliveryNodeDBName}`
@@ -150,6 +152,64 @@ module.exports = {
                     } else {
                         logger.info(
                             '     ----[🟠🟢] servertokens   | Table Created'
+                        )
+                    }
+                    resolve(true)
+                }
+            })
+        })
+    },
+    generateTableDeliverNodeMeta: async function (logger) {
+        const query = `
+        CREATE TABLE IF NOT EXISTS deliverynode_meta (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            type varchar(255) NOT NULL,
+            value varchar(255) NOT NULL,
+            UNIQUE KEY type (type),
+            PRIMARY KEY (id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+        `
+        return new Promise((resolve, reject) => {
+            db.query(query, [], function (err, results) {
+                if (err) {
+                    logger.info('     ----[🔴] servertokens   | Table Errored')
+                    reject(err)
+                } else {
+                    if (results.changedRows == 0) {
+                        logger.info(
+                            '     ----[🟢] servertokens   | Table Exists'
+                        )
+                    } else {
+                        logger.info(
+                            '     ----[🟠🟢] servertokens   | Table Created'
+                        )
+                    }
+                    resolve(true)
+                }
+            })
+        })
+    },
+
+    insertDefaultsInDeliveryMeta: async function (logger) {
+        let query = `
+      INSERT IGNORE INTO deliverynode_meta (type, value) 
+        VALUES ("migrationVersion", 0)`
+
+        return new Promise((resolve, reject) => {
+            db.query(query, [], function (err, results) {
+                if (err) {
+                    logger.info(
+                        'delivernode_meta  | Insert (insertDefaultsInProtocolMeta) Errored'
+                    )
+                    reject(err)
+                } else {
+                    if (results.changedRows == 0) {
+                        logger.info(
+                            'delivernode_meta  | Insert (insertDefaultsInProtocolMeta) Exists'
+                        )
+                    } else {
+                        logger.info(
+                            'delivernode_meta  | Insert (insertDefaultsInProtocolMeta) Created'
                         )
                     }
                     resolve(true)
