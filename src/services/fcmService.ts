@@ -4,6 +4,17 @@ import * as apn from 'apn'
 import logger from '../loaders/logger'
 var admin = require('firebase-admin')
 var utils = require('../helpers/utilsHelper')
+const filePath = require('path').resolve(__dirname, '../../key.p8')
+const fs = require('fs')
+const key = fs.readFileSync(filePath, 'utf8')
+const apnOptions = {
+    token: {
+        key: key,
+        keyId: process.env.DELIVERY_NODE_APN_KEY_ID,
+        teamId: process.env.DELIVERY_NODE_APN_TEAM_ID,
+    },
+    production: true,
+}
 @Service()
 export default class FCMService {
     constructor() {
@@ -30,14 +41,7 @@ export default class FCMService {
 
     public async sendVoIPNotificationToIOS(token, payload) {
         const note = utils.generateIOSVideoCallPayloadFromFeed(payload)
-        const apnOptions = {
-            token: {
-                key: require('../../ket.p8'),
-                keyId: process.env.DELIVERY_NODE_APN_KEY_ID,
-                teamId: process.env.DELIVERY_NODE_APN_TEAM_ID,
-            },
-            production: true,
-        }
+     
         var apnProvider = new apn.Provider(apnOptions)
         return apnProvider
             .send(note, token)
