@@ -13,7 +13,7 @@ export default class PushTokensService {
     ) {
         logger.debug('Registering device')
         const query =
-            'INSERT IGNORE INTO pushtokens (wallet, device_token, platform, apn_token) VALUES (?, ?, ?, ?)'
+            'INSERT IGNORE INTO pushtokens (wallet, device_token, platform, apn_token) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE apn_token = VALUES(apn_token), device_token = VALUES(device_token);'
         const insert_push_token = async (query, logger) => {
             return new Promise((resolve, reject) => {
                 db.query(
