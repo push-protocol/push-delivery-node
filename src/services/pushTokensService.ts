@@ -1,5 +1,6 @@
 import { Service, Inject } from 'typedi'
 import logger from '../loaders/logger'
+import config from '../config'
 var db = require('../database/dbHelper')
 
 @Service()
@@ -7,16 +8,17 @@ export default class PushTokensService {
     public async registerDevice(
         wallet: string,
         device_token: string,
-        platform: string
+        platform: string,
+        apn_token: string = null
     ) {
         logger.debug('Registering device')
         const query =
-            'INSERT IGNORE INTO pushtokens (wallet, device_token, platform) VALUES (?, ?, ?)'
+            'INSERT IGNORE INTO pushtokens (wallet, device_token, platform, apn_token) VALUES (?, ?, ?, ?)'
         const insert_push_token = async (query, logger) => {
             return new Promise((resolve, reject) => {
                 db.query(
                     query,
-                    [wallet, device_token, platform],
+                    [wallet, device_token, platform, apn_token?? null],
                     function (err, results) {
                         if (err) {
                             logger.error(err)
@@ -41,12 +43,14 @@ export default class PushTokensService {
         }
     }
 
-    async getDeviceTokens(wallets: any[]) {
+    async getDeviceTokens(wallets: any[], voip = false) {
         logger.debug('Trying to convert wallets to device tokens: %o', wallets)
         const queryClause = "('" + wallets.join("','") + "')"
-        const query =
-            'SELECT wallet, device_token from pushtokens WHERE wallet IN ' +
-            queryClause
+        const query = voip
+            ? 'SELECT wallet, platform, device_token, apn_token from pushtokens WHERE wallet IN ' +
+              queryClause
+            : 'SELECT wallet, platform, device_token from pushtokens WHERE wallet IN ' +
+              queryClause
 
         return await new Promise((resolve, reject) => {
             db.query(query, function (err, results) {
@@ -60,12 +64,28 @@ export default class PushTokensService {
             .then((response) => {
                 logger.info('✅ Completed getDeviceTokens(): %o', response)
 
-                let devices = []
+                let devices: string[] = []
+                let platform
                 for (var i in response) {
-                    devices.push(response[i]['device_token'])
+                    if (voip) {
+                        if (response[i]['platform'] == config.platformEnum.ios) {
+                            devices.push(`${response[i]['apn_token']}`)
+                            platform = config.platformEnum.ios
+                        } else if (response[i]['platform'] == config.platformEnum.android) {
+                            platform = config.platformEnum.android
+                            devices.push(`${response[i]['device_token']}`)
+                        }
+                    } else {
+                        devices.push(`${response[i]['device_token']}`)
+                    }
                 }
 
-                return { success: 1, devices: devices }
+                return {
+                    success: 1,
+                    devices: devices,
+                    voip: voip,
+                    platform: platform,
+                }
             })
             .catch((err) => {
                 logger.error(err)

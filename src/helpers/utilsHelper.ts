@@ -1,5 +1,7 @@
 import { ethers } from 'ethers'
-
+import * as apn from 'apn'
+import config from "../config"
+import crypto from "crypto"
 module.exports = {
     // To Generate Random Password
     generateRandomWord: (length, includeSpecial) => {
@@ -23,40 +25,42 @@ module.exports = {
         return ethers.utils.isAddress(address)
     },
 
-  // nft:eip155:nftChainId:nftContractAddress:nftTokenId:RandomHash
-  isValidNFTAddress: (address: string): boolean => {
-    const addressComponents = address.split(':')
-    const epochRegex = /^[0-9]{10}$/
-  
-    if (
-      addressComponents.length >= 5 &&
-      addressComponents[0].toLowerCase() === 'nft' &&
-      addressComponents[1].toLowerCase() === 'eip155' &&
-      !isNaN(Number(addressComponents[2])) &&
-      Number(addressComponents[2]) > 0 &&
-      ethers.utils.isAddress(addressComponents[3]) &&
-      !isNaN(Number(addressComponents[4])) &&
-      Number(addressComponents[4]) > 0
-    ) {
-      if (addressComponents.length === 5) {
-        // The address is in the V2 format
-        return true
-      } else if (addressComponents.length === 6 && epochRegex.test(addressComponents[5])) {
-        // The address is in the original format
-        return true
-      }
-    }
-    // The address does not conform to either format
-    return false
-  },
-  
+    // nft:eip155:nftChainId:nftContractAddress:nftTokenId:RandomHash
+    isValidNFTAddress: (address: string): boolean => {
+        const addressComponents = address.split(':')
+        const epochRegex = /^[0-9]{10}$/
+
+        if (
+            addressComponents.length >= 5 &&
+            addressComponents[0].toLowerCase() === 'nft' &&
+            addressComponents[1].toLowerCase() === 'eip155' &&
+            !isNaN(Number(addressComponents[2])) &&
+            Number(addressComponents[2]) > 0 &&
+            ethers.utils.isAddress(addressComponents[3]) &&
+            !isNaN(Number(addressComponents[4])) &&
+            Number(addressComponents[4]) > 0
+        ) {
+            if (addressComponents.length === 5) {
+                // The address is in the V2 format
+                return true
+            } else if (
+                addressComponents.length === 6 &&
+                epochRegex.test(addressComponents[5])
+            ) {
+                // The address is in the original format
+                return true
+            }
+        }
+        // The address does not conform to either format
+        return false
+    },
+
     isValidPartialCAIP10Address: function (
         addressinPartialCAIP: string
     ): boolean {
         try {
-
-            if (this.isValidNFTAddress(addressinPartialCAIP)) { 
-                return true;
+            if (this.isValidNFTAddress(addressinPartialCAIP)) {
+                return true
             }
 
             let addressComponent = addressinPartialCAIP.split(':')
@@ -69,6 +73,71 @@ module.exports = {
         } catch (err) {
             return false
         }
+    },
+    generateAndrioidVideoCallPayloadFromFeed: (feedPayload) => {
+        let payload = {
+            data: feedPayload.notification,
+            apns: {
+                payload: {
+                    aps: {
+                        'content-available': 1,
+                        'mutable-content': 1,
+                        category: 'withappicon',
+                    },
+                },
+                headers: {
+                    'apns-priority':
+                        feedPayload.data.additionalMeta !== null ||
+                        feedPayload.data.videoMeta !== null
+                            ? '10'
+                            : '5', // Set the priority to high
+                },
+                fcm_options: {
+                    image: feedPayload.data.icon,
+                },
+            },
+            android: {
+                priority:
+                    feedPayload.data.additionalMeta !== null ||
+                    feedPayload.data.videoMeta !== null
+                        ? 'high'
+                        : 'normal',
+            },
+        }
+
+        return payload
+    },
+
+    generateIOSVideoCallPayloadFromFeed: (feedPayload, apnConfig =  config.apnConfig) => {
+        const sender = JSON.parse(feedPayload.data.additionalMeta.data).senderAddress
+        const shorthandSenderAdress =
+            sender.substring(0, 4) + '....' + sender.substring(38)
+        const note = new apn.Notification()
+        note.expiry = apnConfig.expiry
+        note.badge = apnConfig.badge
+        note.alert = `Video call from ${shorthandSenderAdress}`
+        note.sound = apnConfig.sound
+        const details = {
+            title: 'Video Call from ' + shorthandSenderAdress,
+            body: 'Video Call from ' + shorthandSenderAdress,
+        }
+        note.rawPayload = {
+            callerName: shorthandSenderAdress,
+            aps: {
+                'content-available': 1,
+            },
+            handle: shorthandSenderAdress,
+            details,
+            status: 1, // VideoCallStatus.INITIALIZED,
+            uuid: crypto.randomUUID()
+        }
+        note.topic =
+            config.deliveryNodesNet == 'STAGING' || config.deliveryNodesNet == 'DEV'
+                ? 'io.epns.epnsstaging.voip'
+                : config.deliveryNodesNet == 'PROD'
+                ? 'io.epns.epnsproject.voip'
+                : ''
+        return note
     },
 
     generateMessagingPayloadFromFeed: (feedPayload) => {
@@ -84,8 +153,8 @@ module.exports = {
                 },
                 headers: {
                     'apns-priority':
-                        (feedPayload.data.additionalMeta !== null ||
-                        feedPayload.data.videoMeta !== null)
+                        feedPayload.data.additionalMeta !== null ||
+                        feedPayload.data.videoMeta !== null
                             ? '10'
                             : '5', // Set the priority to high
                 },
@@ -95,8 +164,8 @@ module.exports = {
             },
             android: {
                 priority:
-                  (feedPayload.data.additionalMeta !== null ||
-                  feedPayload.data.videoMeta !== null)
+                    feedPayload.data.additionalMeta !== null ||
+                    feedPayload.data.videoMeta !== null
                         ? 'high'
                         : 'normal',
                 notification: {
@@ -119,8 +188,7 @@ module.exports = {
         result: string
         err: string | null
     } {
-
-        if (this.isValidNFTAddress(addressinCAIP)) { 
+        if (this.isValidNFTAddress(addressinCAIP)) {
             return { result: addressinCAIP, err: null }
         }
         let addressComponent = addressinCAIP.split(':')

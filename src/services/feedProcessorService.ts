@@ -8,6 +8,19 @@ var utils = require('../helpers/utilsHelper')
 
 @Service()
 export default class FeedsService {
+    private generateMessageBasedOnPlatformAndType(
+        feed: any,
+        platform: string,
+        voip: boolean
+    ) {
+        if (!voip) {
+            return utils.generateMessagingPayloadFromFeed(feed)
+        } else {
+            if (voip && platform == config.platformEnum.android)
+                return utils.generateAndrioidVideoCallPayloadFromFeed(feed)
+        }
+        return feed
+    }
     public async processFeed(feed: any) {
         try {
             logger.debug('Process feed for sid: %o | feed: %o', feed.sid, feed)
@@ -37,9 +50,12 @@ export default class FeedsService {
             }
             const pushTokens = Container.get(PushTokensService)
             const deviceTokensMeta = await pushTokens.getDeviceTokens(
-                feed.users
+                feed.users,
+                feed.payload.data.additionalMeta &&
+                    JSON.parse(feed.payload.data.additionalMeta.data).status ==
+                        1
             )
-            let devices = deviceTokensMeta['devices']
+            let devices = deviceTokensMeta.devices
             if (devices.length == 0) {
                 logger.info(
                     'The feed has no appropriate device id mappings for the given addresses, hence skipping the feed with sid :: %o ',
@@ -49,10 +65,14 @@ export default class FeedsService {
             }
             const pushMessage = Container.get(PushMessageService)
             let count = 0
-            const msgPayload = utils.generateMessagingPayloadFromFeed(
-                feed.payload
+            const msgPayload = this.generateMessageBasedOnPlatformAndType(
+                feed.payload,
+                deviceTokensMeta.platform,
+                deviceTokensMeta.voip
             )
-
+            // to keep track of the pltform and voip status
+            msgPayload.platform = deviceTokensMeta.platform
+            msgPayload.voip = deviceTokensMeta.voip
             while (devices.length) {
                 const deviceChunk = devices.splice(
                     0,
