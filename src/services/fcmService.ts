@@ -13,7 +13,7 @@ const apnOptions = {
         keyId: process.env.DELIVERY_NODE_APN_KEY_ID,
         teamId: process.env.DELIVERY_NODE_APN_TEAM_ID,
     },
-    production: true,
+    production: config.deliveryNodesNet == 'PROD' ? true : false,
 }
 @Service()
 export default class FCMService {
@@ -41,18 +41,19 @@ export default class FCMService {
 
     public async sendVoIPNotificationToIOS(token, payload) {
         const note = utils.generateIOSVideoCallPayloadFromFeed(payload)
-     
+
         var apnProvider = new apn.Provider(apnOptions)
         return apnProvider
             .send(note, token)
             .then((result: any) => {
-                if (result)
-                    if (!result.failed) {
+                if (result) {
+                    if (result.failed.length == 0) {
                         logger.info('RESULT', result)
                         return result
                     } else {
-                        throw result.failed[0].response
+                        throw result.failed
                     }
+                }
             })
             .catch((error) => {
                 logger.error('Error sending message: %o', error)

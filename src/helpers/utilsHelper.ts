@@ -132,7 +132,7 @@ module.exports = {
             uuid: crypto.randomUUID()
         }
         note.topic =
-            config.deliveryNodesNet == 'STAGING'
+            config.deliveryNodesNet == 'STAGING' || config.deliveryNodesNet == 'DEV'
                 ? 'io.epns.epnsstaging.voip'
                 : config.deliveryNodesNet == 'PROD'
                 ? 'io.epns.epnsproject.voip'
