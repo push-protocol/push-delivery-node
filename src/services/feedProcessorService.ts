@@ -48,6 +48,13 @@ export default class FeedsService {
                 )
                 return
             }
+            if( feed.payload.data.additionalMeta &&   JSON.parse(feed.payload.data.additionalMeta.data).status == 4){
+                logger.info(
+                    'Cancel video call feed sid:: %o ',
+                    feed.sid
+                )
+                return
+            }
             const pushTokens = Container.get(PushTokensService)
             const deviceTokensMeta = await pushTokens.getDeviceTokens(
                 feed.users,
