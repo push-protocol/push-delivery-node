@@ -52,6 +52,10 @@ export class MySqlUtil {
   static pool: Pool
 
   public static init(pool: Pool) {
+    if (MySqlUtil.pool != null) {
+      // only 1st call is valid
+      return
+    }
     MySqlUtil.pool = pool
     if (!MySqlUtil.logSql && EnvLoader.getPropertyAsBool('LOG_SQL_STATEMENTS')) {
       pool.on('connection', function (connection) {

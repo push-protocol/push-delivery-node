@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS blocks
 (
   id          BIGINT       NOT NULL AUTO_INCREMENT,
   object_hash VARCHAR(255) NULL COMMENT 'optional: a uniq field to fight duplicates',
+  object_shard INT         NOT NULL COMMENT 'message block shard',
   object      MEDIUMTEXT   NOT NULL,
   ts          timestamp default CURRENT_TIMESTAMP(),
   PRIMARY KEY (id),

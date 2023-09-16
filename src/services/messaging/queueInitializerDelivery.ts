@@ -2,7 +2,7 @@ import {Inject, Service} from 'typedi'
 import {MySqlUtil} from '../../utilz/mySqlUtil'
 import {Logger} from 'winston'
 import schedule from 'node-schedule'
-import {ValidatorContractState} from '../messaging/validatorContractState'
+import {ValidatorContractState} from './validatorContractState'
 import {WinstonUtil} from '../../utilz/winstonUtil'
 import {QueueServer} from '../messaging-dset/queueServer'
 import {QueueClient} from '../messaging-dset/queueClient'
@@ -97,31 +97,9 @@ export class QueueInitializerDelivery {
     throw new Error('invalid queue')
   }
 
-  public async listServers(): Promise<any> {
-    const result: string[] = []
-    const rows = await MySqlUtil.queryArr<{ queue_name: string }>(
-      'select queue_name from dset_server'
-    )
-    for (const r of rows) {
-      result.push(r.queue_name)
-    }
-    return { result: result }
-  }
-
   public async getQueueLastOffset(queueName: string): Promise<any> {
     const lastOffset = await this.getQueue(queueName).getLastOffset()
     return { result: lastOffset }
-  }
-
-  public async expectValidQueueName(queueName: string): Promise<void> {
-    const obj = await MySqlUtil.queryOneRow<{ dset_name }>(
-      'select queue_name from dset_server ' + 'where queue_name=?',
-      queueName
-    )
-    if (obj == null) {
-      return Promise.reject('no dset found')
-    }
-    return Promise.resolve()
   }
 
   public async readItems(dsetName: string, firstOffset: number){

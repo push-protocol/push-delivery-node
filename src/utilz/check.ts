@@ -18,4 +18,10 @@ export class Check {
       throw new Error(StrUtil.isEmpty(err) ? 'Str empty check failed' : err)
     }
   }
+
+  public static notEmptyArr(value: any[], err?: string) {
+    if (value == null || value.length == 0) {
+      throw new Error(StrUtil.isEmpty(err) ? 'Str empty check failed' : err)
+    }
+  }
 }

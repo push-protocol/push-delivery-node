@@ -46,12 +46,10 @@ export default class DeliveryNode implements Consumer<QItem> {
 
   public async postConstruct() {
     MySqlUtil.init(dbHelper.pool);
+    await this.blockStorage.postConstruct();
     await this.contract.postConstruct();
     await this.queueInitializer.postConstruct();
   }
-
-
-
 
   // remote queue handler
   async accept(item: QItem): Promise<boolean> {
@@ -69,7 +67,7 @@ export default class DeliveryNode implements Consumer<QItem> {
     // check contents
     // since this check is not for historical data, but for realtime data,
     // so we do not care about old blocked validators which might occur in the historical queue
-    let activeValidators = new Set(this.contract.getActiveValidators().map(v => v.nodeId));
+    let activeValidators = CollectionUtil.arrayToFields(this.contract.getActiveValidators(), 'nodeId');
     let check1 = MessageBlockUtil.checkBlock(mb, activeValidators);
     if (!check1.success) {
       this.log.error('item validation failed: ', check1.err);
