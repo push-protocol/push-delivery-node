@@ -101,7 +101,8 @@ export default class DeliveryNode implements Consumer<QItem> {
         continue;
       }
       let count = 0;
-      const msgPayload = utils.generateMessagingPayloadFromFeed(payload)
+      const msgPayload = utils.generateMessagingPayloadFromFeed(payload);
+      this.log.debug('Sending', msgPayload);
       while (devices.length) {
         const deviceChunk = devices.splice(0, config.messagingChunkMaxSize);
         const loopId = payload.data.sid + '_' + count

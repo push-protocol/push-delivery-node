@@ -2,11 +2,12 @@ import { Container } from 'typedi'
 import schedule from 'node-schedule'
 import MessagingService from '../services/pushMessageService'
 import AuthService from '../services/authService'
-import logger from '../loaders/logger'
 
 import { client } from './redis'
+import {WinstonUtil} from "../utilz/winstonUtil";
 
 export default () => {
+    let logger = WinstonUtil.newLog('fcm');
     // 1. MESSAGE PROCESSING
     // Schedule message delivery for undelivered messages
     logger.info('-- 🛵 Scheduling Messaging Processing [Every 1 Min]')
