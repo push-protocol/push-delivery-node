@@ -6,7 +6,6 @@ description: main application pipeline
 serialPipeline:
   stages:
   - targetId: gke-stage-delivery-node
-    profiles: []
 ---
 apiVersion: deploy.cloud.google.com/v1
 kind: Target
