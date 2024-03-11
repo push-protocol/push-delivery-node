@@ -12,7 +12,7 @@ steps:
       ls ../
       docker build -t us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA .
       docker push us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA
-
+  
 # Step 2: Create the Cloud Deploy Pipeline and release
 - name: 'gcr.io/cloud-builders/gcloud'
   entrypoint: 'bash'
