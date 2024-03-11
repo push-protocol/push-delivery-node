@@ -1,37 +1,15 @@
 steps:
-# Step 1: Build the Docker Image
-- name: 'gcr.io/cloud-builders/docker'
-  args: [ 'build', '-t', 'us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA', '.' ]
-
-# Step 2: Push the Docker Image to Artifact Registry
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA']
-
-# Step 3: Create the Cloud Deploy Pipeline and release
+# Step 1: Build the Docker Image and push to Artifact Registry
 - name: 'gcr.io/cloud-builders/gcloud'
   entrypoint: 'bash'
   args:
     - '-c'
     - | 
       #!/bin/bash
-      export CD_EXIST=$(gcloud deploy delivery-pipelines list --region=us-central1 --filter=delivery-node)
-      if [[ -z "$${CD_EXIST// /}" ]]
-      then
-        gcloud deploy apply --file=./stage-pipeline/clouddeploy.yaml --region=us-central1 --project=cloudside-academy
-        echo "Applyment successfull"
-        gcloud deploy releases create gke-delivery-node-release-$SHORT_SHA \
-        --project=push-stage-apps \
-        --region=us-central1 \
-        --delivery-pipeline=cd-s-services-base-usce1-delivery-node \
-        --images=us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image=us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA
-        echo "First release successfully done"
-      else
-        gcloud deploy releases create gke-delivery-node-release-$SHORT_SHA \
-        --project=push-stage-apps \
-        --region=us-central1 \
-        --delivery-pipeline=cd-s-services-base-usce1-delivery-node \
-        --images=us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image=us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA
-        echo "Latest release successfully done"
-      fi
+      touch key.p8
+      cp .env.sample .env
+      gcloud builds submit --region=us-central1 --tag us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA
+
+
 options:
  logging: CLOUD_LOGGING_ONLY  
