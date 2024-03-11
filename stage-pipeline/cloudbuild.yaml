@@ -9,7 +9,6 @@ steps:
       touch key.p8
       cp .env.sample .env
       ls -a
-      ls ../
       docker build -t us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA .
       docker push us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA
 
@@ -20,6 +19,7 @@ steps:
     - '-c'
     - | 
       #!/bin/bash
+      cp ./stage-pipeline/skaffold.yaml .
       export CD_EXIST=$(gcloud deploy delivery-pipelines list --region=us-central1 --filter=delivery-node)
       if [[ -z "$${CD_EXIST// /}" ]]
       then
