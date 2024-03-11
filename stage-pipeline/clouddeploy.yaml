@@ -11,6 +11,6 @@ apiVersion: deploy.cloud.google.com/v1
 kind: Target
 metadata:
   name: gke-stage-delivery-node
-description: prod GKE cluster
+description: GKE cluster
 gke:
  cluster: projects/push-stage-apps/locations/us-central1/clusters/gke-s-services-base-usce1
