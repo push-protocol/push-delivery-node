@@ -23,14 +23,14 @@ steps:
         --project=push-stage-apps \
         --region=us-central1 \
         --delivery-pipeline=cd-s-services-base-usce1-delivery-node \
-        --images=us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image=us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHAd
+        --images=us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image=us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA
         echo "First release successfully done"
       else
         gcloud deploy releases create gke-delivery-node-release-$SHORT_SHA \
         --project=push-stage-apps \
         --region=us-central1 \
         --delivery-pipeline=cd-s-services-base-usce1-delivery-node \
-        --images=us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image=us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHAd
+        --images=us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image=us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA
         echo "Latest release successfully done"
       fi
       
