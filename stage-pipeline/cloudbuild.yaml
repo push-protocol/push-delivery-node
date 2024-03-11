@@ -23,7 +23,7 @@ steps:
       export CD_EXIST=$(gcloud deploy delivery-pipelines list --region=us-central1 --filter=delivery-node)
       if [[ -z "$${CD_EXIST// /}" ]]
       then
-        gcloud deploy apply --file=./stage-pipeline/clouddeploy.yaml --region=us-central1 --project=cloudside-academy
+        gcloud deploy apply --file=./stage-pipeline/clouddeploy.yaml --region=us-central1 --project=push-stage-apps
         echo "Applyment successfull"
         gcloud deploy releases create gke-delivery-node-release-$SHORT_SHA \
         --project=push-stage-apps \
