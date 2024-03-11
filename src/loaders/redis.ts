@@ -7,7 +7,6 @@ var client
 export default async () => {
     client = await createClient({
         url: config.REDIS_URL,
-        password: config.REDIS_AUTH,
     })
     await client.connect()
     client.on('error', (err) => logger.error('Redis Client Error', err))
