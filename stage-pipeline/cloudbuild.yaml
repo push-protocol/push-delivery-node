@@ -10,6 +10,5 @@ steps:
       cp .env.sample .env
       gcloud builds submit --region=us-central1 --tag us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA
 
-
 options:
  logging: CLOUD_LOGGING_ONLY  
