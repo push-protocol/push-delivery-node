@@ -1,20 +1,20 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: "Deployment"
 metadata:
-  name: push-delivery-node
-  namespace: apps
+  name: "push-delivery-node"
+  namespace: "apps"
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: push-delivery-node
+      app: "push-delivery-node"
   template:
     metadata:
       labels:
-        app: push-delivery-node
+        app: "push-delivery-node"
     spec:
       containers:
-      - name: push-delivery-node
+      - name: "push-delivery-node"
         image: "us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/"
         ports:
         - containerPort: 7575
