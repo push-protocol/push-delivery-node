@@ -2,6 +2,6 @@ apiVersion: skaffold/v4beta7
 kind: Config
 manifests:
   rawYaml:
-  - ./stage-pipeline/k8s/deployment.yaml
+  - deployment.yaml
 deploy:
   kubectl: {}
