@@ -27,17 +27,17 @@ steps:
         echo "Pipeline not present, creating..."
         gcloud deploy apply --file=./stage-pipeline/clouddeploy.yaml --region=us-central1 --project=push-stage-apps
         echo "Pipeline created"
-        gcloud deploy releases create gke-delivery-node-release-$SHORT_SHA \
+        gcloud deploy releases create gke-del-rel-$SHORT_SHA \
         --project=push-stage-apps \
         --region=us-central1 \
-        --delivery-pipeline=cd-s-services-base-usce1-delivery-node \
+        --delivery-pipeline=cd-s-services-base-usce1-delivery \
         --images=us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image=us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA
         echo "First release successfully done"
       else
-        gcloud deploy releases create gke-delivery-node-release-$SHORT_SHA \
+        gcloud deploy releases create gke-del-rel--$SHORT_SHA \
         --project=push-stage-apps \
         --region=us-central1 \
-        --delivery-pipeline=cd-s-services-base-usce1-delivery-node \
+        --delivery-pipeline=cd-s-services-base-usce1-delivery \
         --images=us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image=us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA
         echo "Latest release successfully done"
       fi
