@@ -13,4 +13,3 @@ metadata:
 description: GKE cluster
 gke:
  cluster: projects/push-stage-apps/locations/us-central1/clusters/gke-s-services-base-usce1
----
