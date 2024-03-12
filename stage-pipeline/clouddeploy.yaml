@@ -6,6 +6,16 @@ serialPipeline:
   stages:
   - targetId: gke-stage-delivery-node
     profiles: []
+    strategy:
+      canary:
+        runtimeConfig:
+          kubernetes:
+            serviceNetworking:
+              service: "push-delivery-node-service"
+              deployment: "push-delivery-node"
+        canaryDeployment:
+          percentages: [50]
+          verify: false
 ---
 apiVersion: deploy.cloud.google.com/v1
 kind: Target
