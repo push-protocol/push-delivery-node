@@ -18,28 +18,17 @@ steps:
     - '-c'
     - | 
       #!/bin/bash
-      cp ./stage-pipeline/skaffold.yaml .
-      cp ./stage-pipeline/k8s/deployment.yaml .
-      ls
-      export CD_EXIST=$(gcloud deploy delivery-pipelines list --region=us-central1 --filter=delivery-node)
-      if [[ -z "$${CD_EXIST// /}" ]]
+      gcloud container clusters get-credentials gke-s-services-base-usce1 --region us-central1 --project push-stage-apps
+      export DEP_EXIST=$(kubectl get deployment -n apps | grep push-delivery-node)
+      if [[ -z "$${DEP_EXIST// /}" ]]
       then
-        echo "Pipeline not present, creating..."
-        gcloud deploy apply --file=./stage-pipeline/clouddeploy.yaml --region=us-central1 --project=push-stage-apps
-        echo "Pipeline created"
-        gcloud deploy releases create gke-del-rel-$SHORT_SHA \
-        --project=push-stage-apps \
-        --region=us-central1 \
-        --delivery-pipeline=cd-s-services-base-usce1-delivery \
-        --images=us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image=us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA
-        echo "First release successfully done"
+        echo "Creating Deployment..."
+        kubectl apply -f ./stage-pipeline/k8s/deployment.yaml
+        echo "Created Deployment."
       else
-        gcloud deploy releases create gke-del-rel--$SHORT_SHA \
-        --project=push-stage-apps \
-        --region=us-central1 \
-        --delivery-pipeline=cd-s-services-base-usce1-delivery \
-        --images=us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image=us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA
-        echo "Latest release successfully done"
+        echo "Updating Deployment..."
+        kubectl set image deployment push-delivery-node push-delivery-node=us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA
+        echo "Updated Deployment..."
       fi
 options:
  logging: CLOUD_LOGGING_ONLY  
