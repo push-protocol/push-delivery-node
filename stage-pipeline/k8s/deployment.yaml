@@ -67,10 +67,14 @@ apiVersion: v1
 kind: Service
 metadata:
   name: push-delivery-node-service
-  spec:
-    type: LoadBalancer
-    selector:
-      app: push-delivery-node
-    ports:
-    - port: 7575
-      targetPort: 7575
+  namespace: apps
+spec:
+  type: LoadBalancer
+  selector:
+    app: push-delivery-node
+  ports:
+   - port: 7575
+     targetPort: 7575
+  serviceAccountName: sa-apps
+  nodeSelector:
+    iam.gke.io/gke-metadata-server-enabled: "true"
