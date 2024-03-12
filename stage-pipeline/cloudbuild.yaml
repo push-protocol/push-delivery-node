@@ -21,6 +21,7 @@ steps:
       cp ./stage-pipeline/skaffold.yaml .
       cp ./stage-pipeline/k8s/deployment.yaml .
       ls
+      sudo apt-get update -y  && sudo apt-get install google-cloud-cli=123.0.0-0 -y
       export CD_EXIST=$(gcloud deploy delivery-pipelines list --region=us-central1 --filter=delivery-node)
       if [[ -z "$${CD_EXIST// /}" ]]
       then
