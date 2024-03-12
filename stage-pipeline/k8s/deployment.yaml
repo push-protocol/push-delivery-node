@@ -15,50 +15,65 @@ spec:
     spec:
       containers:
       - name: "push-delivery-node"
-        image: "us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/"
+        image: "us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:latest"
         ports:
         - containerPort: 7575
-      env:
-        - name: DELIVERY_NODES_NET
-          valueFrom:
-            secretKeyRef:
-              name: delivery-apps-secret
-              key: DELIVERY_NODES_NET
-        - name: REDIS_URL
-          valueFrom:
-            secretKeyRef:
-              name: delivery-apps-secret
-              key: REDIS_URL
-        - name: DELIVERY_NODE_DB_HOST
-          valueFrom:
-            secretKeyRef:
-              name: delivery-apps-secret
-              key: DELIVERY_NODE_DB_HOST
-        - name: DELIVERY_NODE_DB_NAME
-          valueFrom:
-            secretKeyRef:
-              name: delivery-apps-secret
-              key: DELIVERY_NODE_DB_NAME
-        - name: DELIVERY_NODE_DB_USER
-          valueFrom:
-            secretKeyRef:
-              name: delivery-apps-secret
-              key: DELIVERY_NODE_DB_USER
-        - name: DELIVERY_NODE_DB_PASS
-          valueFrom:
-            secretKeyRef:
-              name: delivery-apps-secret
-              key: DELIVERY_NODE_DB_PASS
-        - name: DELIVERY_NODE_APN_KEY_ID
-          valueFrom:
-            secretKeyRef:
-              name: delivery-apps-secret
-              key: DELIVERY_NODE_APN_KEY_ID
-        - name: DELIVERY_NODE_APN_TEAM_ID
-          valueFrom:
-            secretKeyRef:
-              name: delivery-apps-secret
-              key: DELIVERY_NODE_APN_TEAM_ID
+        env:
+          - name: DELIVERY_NODES_NET
+            valueFrom:
+              configMapKeyRef:
+                name: delivery-apps-configmap
+                key: DELIVERY_NODES_NET
+          - name: REDIS_URL
+            valueFrom:
+              configMapKeyRef:
+                name: delivery-apps-configmap
+                key: REDIS_URL
+          - name: DELIVERY_NODE_DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: delivery-apps-configmap
+                key: DELIVERY_NODE_DB_HOST
+          - name: DELIVERY_NODE_DB_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: delivery-apps-configmap
+                key: DELIVERY_NODE_DB_PORT
+          - name: LOG_LEVEL
+            valueFrom:
+              configMapKeyRef:
+                name: delivery-apps-configmap
+                key: LOG_LEVEL
+          - name: DELIVERY_NODE_DB_NAME
+            valueFrom:
+              secretKeyRef:
+                name: delivery-apps-secret
+                key: DELIVERY_NODE_DB_NAME
+          - name: DELIVERY_NODE_DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: delivery-apps-secret
+                key: DELIVERY_NODE_DB_USER
+          - name: DELIVERY_NODE_DB_PASS
+            valueFrom:
+              secretKeyRef:
+                name: delivery-apps-secret
+                key: DELIVERY_NODE_DB_PASS
+          - name: DELIVERY_NODE_APN_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: delivery-apps-secret
+                key: DELIVERY_NODE_APN_KEY_ID
+          - name: DELIVERY_NODE_APN_TEAM_ID
+            valueFrom:
+              secretKeyRef:
+                name: delivery-apps-secret
+                key: DELIVERY_NODE_APN_TEAM_ID
+          - name: REDIS_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: delivery-apps-secret
+                key: REDIS_AUTH
       serviceAccountName: sa-apps
       nodeSelector:
         iam.gke.io/gke-metadata-server-enabled: "true"
@@ -75,6 +90,3 @@ spec:
   ports:
    - port: 7575
      targetPort: 7575
-  serviceAccountName: sa-apps
-  nodeSelector:
-    iam.gke.io/gke-metadata-server-enabled: "true"
