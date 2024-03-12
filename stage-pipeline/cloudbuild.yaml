@@ -8,7 +8,6 @@ steps:
       #!/bin/bash
       touch key.p8
       cp .env.sample .env
-      ls -a
       docker build -t us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA .
       docker push us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA
 
@@ -20,11 +19,14 @@ steps:
     - | 
       #!/bin/bash
       cp ./stage-pipeline/skaffold.yaml .
+      cp ./stage-pipeline/k8s/deployment.yaml .
+      ls
       export CD_EXIST=$(gcloud deploy delivery-pipelines list --region=us-central1 --filter=delivery-node)
       if [[ -z "$${CD_EXIST// /}" ]]
       then
+        echo "Pipeline not present, creating..."
         gcloud deploy apply --file=./stage-pipeline/clouddeploy.yaml --region=us-central1 --project=push-stage-apps
-        echo "Applyment successfull"
+        echo "Pipeline created"
         gcloud deploy releases create gke-delivery-node-release-$SHORT_SHA \
         --project=push-stage-apps \
         --region=us-central1 \
