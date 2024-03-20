@@ -84,7 +84,7 @@ metadata:
   name: push-delivery-node-service
   namespace: apps
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: push-delivery-node
   ports:
