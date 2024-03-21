@@ -78,11 +78,28 @@ spec:
       nodeSelector:
         iam.gke.io/gke-metadata-server-enabled: "true"
 ---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: envoy-baconfig
+spec:
+  healthCheck:
+    checkIntervalSec: 15
+    timeoutSec: 15
+    healthyThreshold: 1
+    unhealthyThreshold: 2
+    type: HTTP
+    requestPath: /healthz
+    port: 7575
+---
 apiVersion: v1
 kind: Service
 metadata:
   name: push-delivery-node-service
   namespace: apps
+  annotations:
+    cloud.google.com/backend-config: '{"default": "envoy-beconfig"}'
+    cloud.google.com/app-protocols: '{"http":"HTTP"}'
 spec:
   type: ClusterIP
   selector:
