@@ -88,5 +88,5 @@ spec:
   selector:
     app: push-delivery-node
   ports:
-   - port: 80
+   - port: 7575
      targetPort: 7575
