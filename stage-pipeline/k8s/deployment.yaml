@@ -81,7 +81,8 @@ spec:
 apiVersion: cloud.google.com/v1
 kind: BackendConfig
 metadata:
-  name: envoy-baconfig
+  name: delivery-backend-config
+  namespace: apps
 spec:
   healthCheck:
     checkIntervalSec: 15
@@ -98,7 +99,7 @@ metadata:
   name: push-delivery-node-service
   namespace: apps
   annotations:
-    cloud.google.com/backend-config: '{"default": "backend-config"}'
+    cloud.google.com/backend-config: '{"default": "delivery-backend-config"}'
     cloud.google.com/app-protocols: '{"http":"HTTP"}'
 spec:
   type: ClusterIP
