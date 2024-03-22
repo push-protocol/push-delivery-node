@@ -97,6 +97,9 @@ kind: Service
 metadata:
   name: push-delivery-node-service
   namespace: apps
+  annotations:
+    cloud.google.com/backend-config: '{"default": "backend-config"}'
+    cloud.google.com/app-protocols: '{"http":"HTTP"}'
 spec:
   type: ClusterIP
   selector:
