@@ -1,0 +1,36 @@
+steps:
+# Step 1: Build the Docker Image and push to Artifact Registry
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - | 
+      #!/bin/bash
+      touch key.p8
+      cp .env.sample .env
+      docker build -t us-central1-docker.pkg.dev/push-prod-apps/ar-p-services-base-usce1/push-delivery-node-image:$SHORT_SHA .
+      docker push us-central1-docker.pkg.dev/push-prod-apps/ar-p-services-base-usce1/push-delivery-node-image:$SHORT_SHA
+
+# Step 2: Create the Cloud Deploy Pipeline and release
+- name: 'gcr.io/cloud-builders/gcloud'
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - | 
+      #!/bin/bash
+      gcloud container clusters get-credentials gke-p-services-base-usce1 --region us-central1 --project push-prod-apps
+      export DEP_EXIST=$(kubectl get deployment -n apps | grep push-delivery-node)
+      if [[ -z "$${DEP_EXIST// /}" ]]
+      then
+        echo "Creating Deployment..."
+        gcloud artifacts docker tags add us-central1-docker.pkg.dev/push-prod-apps/ar-p-services-base-usce1/push-delivery-node-image:$SHORT_SHA us-central1-docker.pkg.dev/push-prod-apps/ar-p-services-base-usce1/push-delivery-node-image:init
+        kubectl apply -f ./prod-pipeline/k8s/deployment.yaml
+        echo "Created Deployment."
+      else
+        echo "Updating Deployment..."
+        kubectl set image deployment push-delivery-node push-delivery-node=us-central1-docker.pkg.dev/push-prod-apps/ar-p-services-base-usce1/push-delivery-node-image:$SHORT_SHA
+        echo "Updated Deployment..."
+      fi
+options:
+ logging: CLOUD_LOGGING_ONLY
+ workerPool: 'projects/push-prod-apps/locations/us-central1/workerPools/worker-pool-p-services-base-usce1'
