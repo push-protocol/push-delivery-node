@@ -28,7 +28,7 @@ steps:
         echo "Created Deployment."
       else
         echo "Updating Deployment..."
-        kubectl set image deployment push-delivery-node push-delivery-node=us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA
+        kubectl set image deployment push-delivery-node push-delivery-node=us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA -n=apps
         echo "Updated Deployment..."
       fi
 options:
