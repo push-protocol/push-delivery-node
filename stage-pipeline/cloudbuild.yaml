@@ -8,8 +8,8 @@ steps:
       #!/bin/bash
       touch key.p8
       cp .env.sample .env
-      docker build -t us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA .
-      docker push us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA
+      docker build -t us-central1-docker.pkg.dev/push-dev-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA .
+      docker push us-central1-docker.pkg.dev/push-dev-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA
 
 # Step 2: Create the Cloud Deploy Pipeline and release
 - name: 'gcr.io/cloud-builders/gcloud'
@@ -18,20 +18,20 @@ steps:
     - '-c'
     - | 
       #!/bin/bash
-      gcloud container clusters get-credentials gke-s-services-base-usce1 --region us-central1 --project push-stage-apps
+      gcloud container clusters get-credentials gke-s-services-base-usce1 --region us-central1 --project push-dev-apps
       export DEP_EXIST=$(kubectl get deployment -n apps | grep push-delivery-node)
       if [[ -z "$${DEP_EXIST// /}" ]]
       then
         echo "Creating Deployment..."
-        gcloud artifacts docker tags add us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:init
-        kubectl apply -f ./stage-pipeline/k8s/deployment.yaml
+        gcloud artifacts docker tags add us-central1-docker.pkg.dev/push-dev-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA us-central1-docker.pkg.dev/push-dev-apps/ar-s-services-base-usce1/push-delivery-node-image:init
+        kubectl apply -f ./dev-pipeline/k8s/deployment.yaml
         echo "Created Deployment."
       else
         echo "Updating Deployment..."
-        kubectl set image deployment push-delivery-node push-delivery-node=us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA -n=apps
+        kubectl set image deployment push-delivery-node push-delivery-node=us-central1-docker.pkg.dev/push-dev-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA -n=apps
         echo "Updated Deployment..."
       fi
 options:
  logging: CLOUD_LOGGING_ONLY
- workerPool: 'projects/push-stage-apps/locations/us-central1/workerPools/worker-pool-s-services-base-usce1'
+ workerPool: 'projects/push-dev-apps/locations/us-central1/workerPools/worker-pool-s-services-base-usce1'
 #newtrigger
