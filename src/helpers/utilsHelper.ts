@@ -1,10 +1,10 @@
 import { ethers } from 'ethers'
 import * as apn from 'apn'
-import config from "../config"
-import crypto from "crypto"
+import config from '../config'
+import crypto from 'crypto'
 module.exports = {
-    // To Generate Random Password
-    generateRandomWord: (length, includeSpecial) => {
+    /* GENERATE RANDOM WORD */
+    generateRandomWord: (length: number, includeSpecial: boolean) => {
         var result = ''
         var characters =
             'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
@@ -21,11 +21,15 @@ module.exports = {
         return result
     },
 
-    isValidAddress: (address) => {
+    /* VALIDATES EVM ADDRESS */
+    isValidAddress: (address: string) => {
         return ethers.utils.isAddress(address)
     },
 
-    // nft:eip155:nftChainId:nftContractAddress:nftTokenId:RandomHash
+    /**
+     * VALIDATES NFT ADDRESS
+     * nft:eip155:nftChainId:nftContractAddress:nftTokenId:RandomHash
+     */
     isValidNFTAddress: (address: string): boolean => {
         const addressComponents = address.split(':')
         const epochRegex = /^[0-9]{10}$/
@@ -74,6 +78,7 @@ module.exports = {
             return false
         }
     },
+
     generateAndrioidVideoCallPayloadFromFeed: (feedPayload) => {
         let payload = {
             data: feedPayload.notification,
@@ -108,8 +113,13 @@ module.exports = {
         return payload
     },
 
-    generateIOSVideoCallPayloadFromFeed: (feedPayload, apnConfig =  config.apnConfig) => {
-        const sender = JSON.parse(feedPayload.data.additionalMeta.data).senderAddress
+    generateIOSVideoCallPayloadFromFeed: (
+        feedPayload,
+        apnConfig = config.apnConfig
+    ) => {
+        const sender = JSON.parse(
+            feedPayload.data.additionalMeta.data
+        ).senderAddress
         const shorthandSenderAdress =
             sender.substring(0, 4) + '....' + sender.substring(38)
         const note = new apn.Notification()
@@ -129,10 +139,11 @@ module.exports = {
             handle: shorthandSenderAdress,
             details,
             status: 1, // VideoCallStatus.INITIALIZED,
-            uuid: crypto.randomUUID()
+            uuid: crypto.randomUUID(),
         }
         note.topic =
-            config.deliveryNodesNet == 'STAGING' || config.deliveryNodesNet == 'DEV'
+            config.deliveryNodesNet == 'STAGING' ||
+            config.deliveryNodesNet == 'DEV'
                 ? 'io.epns.epnsstaging.voip'
                 : config.deliveryNodesNet == 'PROD'
                 ? 'io.epns.epnsproject.voip'
@@ -140,7 +151,11 @@ module.exports = {
         return note
     },
 
-    generateMessagingPayloadFromFeed: (feedPayload) => {
+    /**
+     * GENERATE FCM MESSAGING PAYLOAD FROM FEED
+     * Used only for `web` platform tokens
+     */
+    generateWebMessagingPayloadFromFeed: (feedPayload) => {
         let payload = {
             notification: feedPayload.notification,
             apns: {
@@ -178,6 +193,47 @@ module.exports = {
         }
 
         return payload
+    },
+
+    /**
+     * GENERATE FCM MESSAGING PAYLOAD FROM FEED
+     * Used only for `android` | `ios` platform tokens
+     */
+    generateMobileMessagingPayloadFromFeed: (feedPayload) => {
+        return {
+            type:
+                feedPayload.data.app === 'Push Chat'
+                    ? 'PUSH_NOTIFICATION_CHANNEL'
+                    : 'PUSH_NOTIFICATION_CHAT',
+            data: {
+                notification: feedPayload.notification,
+                image: feedPayload.data.icon,
+            },
+            apns: {
+                payload: {
+                    aps: {
+                        'content-available': 1,
+                        'mutable-content': 1,
+                        category: 'withappicon',
+                    },
+                },
+                headers: {
+                    'apns-priority': '10', // Set the priority to high
+                },
+                fcm_options: {
+                    image: feedPayload.data.icon,
+                },
+            },
+            android: {
+                priority: 'high', // Set the priority to high
+                notification: {
+                    icon: '@drawable/ic_stat_name',
+                    color: '#e20880',
+                    default_vibrate_timings: 'true',
+                    image: feedPayload.data.icon,
+                },
+            },
+        }
     },
 
     /**
