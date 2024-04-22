@@ -206,8 +206,10 @@ module.exports = {
                     ? 'PUSH_NOTIFICATION_CHANNEL'
                     : 'PUSH_NOTIFICATION_CHAT',
             data: {
-                notification: feedPayload.notification,
-                image: feedPayload.data.icon,
+                notification: {
+                    ...feedPayload.notification,
+                    image: feedPayload.data.icon,
+                },
             },
             apns: {
                 payload: {
@@ -218,20 +220,17 @@ module.exports = {
                     },
                 },
                 headers: {
-                    'apns-priority': '10', // Set the priority to high
-                },
-                fcm_options: {
-                    image: feedPayload.data.icon,
+                    // In future additionalMeta will be used for multiple useCases which will be high priority
+                    'apns-priority':
+                        feedPayload.data.additionalMeta !== null ? '10' : '5',
                 },
             },
             android: {
-                priority: 'high', // Set the priority to high
-                notification: {
-                    icon: '@drawable/ic_stat_name',
-                    color: '#e20880',
-                    default_vibrate_timings: 'true',
-                    image: feedPayload.data.icon,
-                },
+                priority:
+                    // In future additionalMeta will be used for multiple useCases which will be high priority
+                    feedPayload.data.additionalMeta !== null
+                        ? 'high'
+                        : 'normal',
             },
         }
     },
