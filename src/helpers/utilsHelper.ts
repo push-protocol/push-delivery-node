@@ -201,15 +201,14 @@ module.exports = {
      */
     generateMobileMessagingPayloadFromFeed: (feedPayload) => {
         return {
-            type:
-                feedPayload.data.app === 'Push Chat'
-                    ? 'PUSH_NOTIFICATION_CHANNEL'
-                    : 'PUSH_NOTIFICATION_CHAT',
             data: {
-                notification: {
-                    ...feedPayload.notification,
-                    image: feedPayload.data.icon,
-                },
+                title: feedPayload.notification.title,
+                body: feedPayload.notification.body,
+                image: feedPayload.data.icon,
+                type:
+                    feedPayload.data.app === 'Push Chat'
+                        ? 'PUSH_NOTIFICATION_CHANNEL'
+                        : 'PUSH_NOTIFICATION_CHAT',
             },
             apns: {
                 payload: {
