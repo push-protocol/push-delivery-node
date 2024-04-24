@@ -207,29 +207,26 @@ module.exports = {
                 image: feedPayload.data.icon,
                 type:
                     feedPayload.data.app === 'Push Chat'
-                        ? 'PUSH_NOTIFICATION_CHANNEL'
-                        : 'PUSH_NOTIFICATION_CHAT',
+                        ? 'PUSH_NOTIFICATION_CHAT'
+                        : 'PUSH_NOTIFICATION_CHANNEL',
             },
+            priority: 10,
             apns: {
                 payload: {
                     aps: {
                         'content-available': 1,
-                        'mutable-content': 1,
-                        category: 'withappicon',
                     },
                 },
                 headers: {
                     // In future additionalMeta will be used for multiple useCases which will be high priority
                     'apns-priority':
                         feedPayload.data.additionalMeta !== null ? '10' : '5',
+                    'apns-push-type': 'background',
+                    'apns-topic': config.apnsTopic,
                 },
             },
             android: {
-                priority:
-                    // In future additionalMeta will be used for multiple useCases which will be high priority
-                    feedPayload.data.additionalMeta !== null
-                        ? 'high'
-                        : 'normal',
+                priority: 'high',
             },
         }
     },
