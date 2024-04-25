@@ -19,7 +19,7 @@ spec:
         ports:
         - containerPort: 7575
         livenessProbe:
-          initialDelaySeconds: 10
+          initialDelaySeconds: 30
           httpGet:
             path: /apis/v1/pushtokens/register
             port: 4000
