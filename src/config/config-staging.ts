@@ -1,5 +1,5 @@
 export default {
-    PUSH_NODE_WEBSOCKET_URL: 'https://backend-staging-v2.push.org',
+    PUSH_NODE_WEBSOCKET_URL: 'https://backend-staging.epns.io',
     REDIS_URL: process.env.REDIS_URL,
     REDIS_AUTH: process.env.REDIS_AUTH,
     // channel can be either full caip or no caip
