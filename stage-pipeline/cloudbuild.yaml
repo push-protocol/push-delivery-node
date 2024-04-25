@@ -29,6 +29,7 @@ steps:
       else
         echo "Updating Deployment..."
         apt update
+        sudo add-apt-repository ppa:rmescandon/yq
         apt install yq -y
         yq e -i '.spec.template.spec.containers[0].image="us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA"' ./stage-pipeline/k8s/deployment.yaml
         kubectl apply -f ./stage-pipeline/k8s/deployment.yaml -n apps        
