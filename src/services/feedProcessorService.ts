@@ -14,9 +14,7 @@ export default class FeedsService {
         voip: boolean
     ) {
         if (!voip) {
-            return platform === config.platformEnum.web
-                ? utils.generateWebMessagingPayloadFromFeed(feed)
-                : utils.generateMobileMessagingPayloadFromFeed(feed)
+            return utils.generateMessagingPayloadFromFeed(feed)
         } else {
             if (voip && platform == config.platformEnum.android)
                 return utils.generateAndrioidVideoCallPayloadFromFeed(feed)
@@ -50,11 +48,11 @@ export default class FeedsService {
                 )
                 return
             }
-            if (
-                feed.payload.data.additionalMeta &&
-                JSON.parse(feed.payload.data.additionalMeta.data).status == 4
-            ) {
-                logger.info('Cancel video call feed sid:: %o ', feed.sid)
+            if( feed.payload.data.additionalMeta &&   JSON.parse(feed.payload.data.additionalMeta.data).status == 4){
+                logger.info(
+                    'Cancel video call feed sid:: %o ',
+                    feed.sid
+                )
                 return
             }
             const pushTokens = Container.get(PushTokensService)
