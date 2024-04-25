@@ -28,10 +28,10 @@ steps:
         echo "Created Deployment."
       else
         echo "Updating Deployment..."
-        kubectl set image deployment push-delivery-node push-delivery-node=us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA -n=apps
+        yq e -i '.spec.template.spec.containers[0].image="us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:$SHORT_SHA"' ./stage-pipeline/k8s/deployment.yaml
+        kubectl apply -f ./stage-pipeline/k8s/deployment.yaml -n apps        
         echo "Updated Deployment..."
       fi
 options:
  logging: CLOUD_LOGGING_ONLY
  workerPool: 'projects/push-stage-apps/locations/us-central1/workerPools/worker-pool-s-services-base-usce1'
-#newtrigger
