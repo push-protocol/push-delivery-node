@@ -18,6 +18,10 @@ spec:
         image: "us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:init"
         ports:
         - containerPort: 7575
+        livenessProbe:
+          httpGet:
+            path: /apis/v1/pushtokens/register
+            port: 4000
         env:
           - name: DELIVERY_NODES_NET
             valueFrom:
