@@ -1,5 +1,9 @@
 export default {
+<<<<<<< HEAD
     PUSH_NODE_WEBSOCKET_URL: 'https://backend-staging.epns.io',
+=======
+    PUSH_NODE_WEBSOCKET_URL: 'https://backend-staging-v2.push.org',
+>>>>>>> parent of f5678a9 (Revert back to GKE CICD state)
     REDIS_URL: process.env.REDIS_URL,
     REDIS_AUTH: process.env.REDIS_AUTH,
     // channel can be either full caip or no caip
@@ -17,4 +21,8 @@ export default {
     messagingMaxAttempts: 5,
     messagingChunkMaxSize: 500,
     preserveStaleMessagesDays: 7,
+    /**
+     * apns related
+     */
+    apnsTopic: 'io.epns.epnsstaging',
 }
