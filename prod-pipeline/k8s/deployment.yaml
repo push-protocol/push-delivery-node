@@ -19,6 +19,9 @@ spec:
         ports:
         - containerPort: 7575
         livenessProbe:
+          initialDelaySeconds: 25
+          periodSeconds: 1
+          failureThreshold: 1
           httpGet:
             path: /apis/v1/pushtokens/register
             port: 7575          
