@@ -183,17 +183,18 @@ export default class PushMessageService {
             const fcm = Container.get(FCMService)
             const payload = JSON.parse(row.payload)
             try {
-                if (payload.voip && payload.platform == config.platformEnum.ios) {
-                    fcmResponse = await fcm.sendVoIPNotificationToIOS(
-                        JSON.parse(row.tokens),
-                        JSON.parse(row.payload)
-                    )
-                } else {
-                    fcmResponse = await fcm.sendMessageToMultipleRecipient(
-                        JSON.parse(row.tokens),
-                        JSON.parse(row.payload)
-                    )
-                }
+                // if (payload.voip && payload.platform == config.platformEnum.ios) {
+                //     fcmResponse = await fcm.sendVoIPNotificationToIOS(
+                //         JSON.parse(row.tokens),
+                //         JSON.parse(row.payload)
+                //     )
+                // } else {
+                //     fcmResponse = await fcm.sendMessageToMultipleRecipient(
+                //         JSON.parse(row.tokens),
+                //         JSON.parse(row.payload)
+                //     )
+                // }
+              valid = false  // This should be removed before switch
             } catch (e) {
                 valid = false
                 logger.error(e)
