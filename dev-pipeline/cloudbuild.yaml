@@ -6,7 +6,6 @@ steps:
     - '-c'
     - | 
       #!/bin/bash
-      touch key.p8
       echo "$${key_p8}" > key.p8
       echo "$${firebase_adminsdk_json}" > firebase-adminsdk.json
       cp .env.sample .env
