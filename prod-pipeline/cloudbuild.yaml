@@ -6,10 +6,12 @@ steps:
     - '-c'
     - | 
       #!/bin/bash
-      touch key.p8
+      echo "$${key_p8}" > key.p8
+      echo "$${firebase_adminsdk_json}" > firebase-adminsdk.json
       cp .env.sample .env
       docker build -t us-central1-docker.pkg.dev/push-prod-apps/ar-p-services-base-usce1/push-delivery-node-image:$SHORT_SHA .
       docker push us-central1-docker.pkg.dev/push-prod-apps/ar-p-services-base-usce1/push-delivery-node-image:$SHORT_SHA
+  secretEnv: ['key_p8','firebase_adminsdk_json']
 
 # Step 2: Create the Cloud Deploy Pipeline and release
 - name: 'gcr.io/cloud-builders/gcloud'
@@ -32,6 +34,12 @@ steps:
         kubectl apply -f ./prod-pipeline/k8s/deployment.yaml -n apps
         echo "Updated Deployment..."
       fi
+availableSecrets:
+  secretManager:
+  - versionName: projects/push-prod-apps/secrets/key_p8/versions/1
+    env: 'key_p8'
+  - versionName: projects/push-prod-apps/secrets/firebase_adminsdk_json/versions/1
+    env: 'firebase_adminsdk_json'
 options:
  logging: CLOUD_LOGGING_ONLY
  workerPool: 'projects/push-prod-apps/locations/us-central1/workerPools/worker-pool-p-services-base-usce1'
