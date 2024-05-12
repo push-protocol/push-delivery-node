@@ -26,6 +26,7 @@ spec:
             path: /apis/v1/pushtokens/register
             port: 7575        
         env:
+          # Config Maps Start
           - name: DELIVERY_NODES_NET
             valueFrom:
               configMapKeyRef:
@@ -51,6 +52,8 @@ spec:
               configMapKeyRef:
                 name: delivery-apps-configmap
                 key: LOG_LEVEL
+          # Config Maps End
+          # Secrets Start
           - name: DELIVERY_NODE_DB_NAME
             valueFrom:
               secretKeyRef:
@@ -81,6 +84,7 @@ spec:
               secretKeyRef:
                 name: delivery-apps-secret
                 key: REDIS_AUTH
+          # Secrets End
       serviceAccountName: sa-apps
       nodeSelector:
         iam.gke.io/gke-metadata-server-enabled: "true"
