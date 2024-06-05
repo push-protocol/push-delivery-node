@@ -8,15 +8,15 @@ spec:
   selector:
     matchLabels:
       app: "push-delivery-node"
-  template:
-    metadata:
-      labels:
-        app: "push-delivery-node"
   strategy:
     type: RollingUpdate
     rollingUpdate:
       maxSurge: 50%
       maxUnavailable: 50%
+  template:
+    metadata:
+      labels:
+        app: "push-delivery-node"
     spec:
       containers:
       - name: "push-delivery-node"
