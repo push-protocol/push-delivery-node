@@ -12,6 +12,11 @@ spec:
     metadata:
       labels:
         app: "push-delivery-node"
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
     spec:
       containers:
       - name: "push-delivery-node"
@@ -22,6 +27,14 @@ spec:
           initialDelaySeconds: 10
           periodSeconds: 1
           failureThreshold: 1
+          httpGet:
+            path: /apis/v1/pushtokens/register
+            port: 7575
+        readinessProbe:
+          initialDelaySeconds: 20
+          periodSeconds: 10         
+          failureThreshold: 1
+          successThreshold: 30      
           httpGet:
             path: /apis/v1/pushtokens/register
             port: 7575
