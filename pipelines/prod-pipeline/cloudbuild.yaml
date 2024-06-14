@@ -26,12 +26,12 @@ steps:
       then
         echo "Creating Deployment..."
         gcloud artifacts docker tags add us-central1-docker.pkg.dev/push-prod-apps/ar-p-services-base-usce1/push-delivery-node-image:$SHORT_SHA us-central1-docker.pkg.dev/push-prod-apps/ar-p-services-base-usce1/push-delivery-node-image:init
-        kubectl apply -f ./prod-pipeline/k8s/deployment.yaml
+        kubectl apply -f ./pipelines/prod-pipeline/k8s/deployment.yaml
         echo "Created Deployment."
       else
         echo "Updating Deployment..."
-        sed -i 's|image: "us-central1-docker.pkg.dev/push-prod-apps/ar-p-services-base-usce1/push-delivery-node-image:init"|image: "us-central1-docker.pkg.dev/push-prod-apps/ar-p-services-base-usce1/push-delivery-node-image:$SHORT_SHA"|g' ./prod-pipeline/k8s/deployment.yaml
-        kubectl apply -f ./prod-pipeline/k8s/deployment.yaml -n apps
+        sed -i "s|image: 'us-central1-docker.pkg.dev/push-prod-apps/ar-p-services-base-usce1/push-delivery-node-image:init'|image: 'us-central1-docker.pkg.dev/push-prod-apps/ar-p-services-base-usce1/push-delivery-node-image:$SHORT_SHA'|g" ./pipelines/prod-pipeline/k8s/deployment.yaml
+        kubectl apply -f ./pipelines/prod-pipeline/k8s/deployment.yaml -n apps
         echo "Updated Deployment..."
       fi
 availableSecrets:
