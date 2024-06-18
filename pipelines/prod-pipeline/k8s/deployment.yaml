@@ -26,7 +26,7 @@ spec:
             cpu: 300m
             memory: 300Mi
           requests:
-            cpu: 200m
+            cpu: 7m
             memory: 150Mi
         ports:
         - containerPort: 7575
@@ -38,7 +38,7 @@ spec:
             path: /apis/v1/pushtokens/register
             port: 7575
         readinessProbe:
-          initialDelaySeconds: 40
+          initialDelaySeconds: 35
           periodSeconds: 10
           failureThreshold: 1
           successThreshold: 3
