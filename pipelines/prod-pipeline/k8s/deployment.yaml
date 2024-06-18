@@ -38,7 +38,7 @@ spec:
             path: /apis/v1/pushtokens/register
             port: 7575
         readinessProbe:
-          initialDelaySeconds: 35
+          initialDelaySeconds: 40
           periodSeconds: 10
           failureThreshold: 1
           successThreshold: 3
