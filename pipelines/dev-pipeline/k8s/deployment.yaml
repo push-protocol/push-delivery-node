@@ -22,26 +22,26 @@ spec:
       - name: 'push-delivery-node'
         image: 'us-central1-docker.pkg.dev/push-dev-apps/ar-d-services-base-usce1/push-delivery-node-image:init'
         resources:
-          requests:
-            memory: 150Mib
-            cpu: 3m
           limits:
-            memory: 500Mib
-            cpu: 10m
+            cpu: 300m
+            memory: 300Mi
+          requests:
+            cpu: 200m
+            memory: 150Mi
         ports:
         - containerPort: 7575
         livenessProbe:
-          initialDelaySeconds: 10
+          initialDelaySeconds: 35
           periodSeconds: 1
           failureThreshold: 1
           httpGet:
             path: /apis/v1/pushtokens/register
             port: 7575
         readinessProbe:
-          initialDelaySeconds: 20
+          initialDelaySeconds: 40
           periodSeconds: 10
           failureThreshold: 1
-          successThreshold: 6
+          successThreshold: 3
           httpGet:
             path: /apis/v1/pushtokens/register
             port: 7575
