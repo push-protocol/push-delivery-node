@@ -21,6 +21,13 @@ spec:
       containers:
       - name: 'push-delivery-node'
         image: 'us-central1-docker.pkg.dev/push-dev-apps/ar-d-services-base-usce1/push-delivery-node-image:init'
+        resources:
+          requests:
+            memory: 150Mib
+            cpu: 3m
+          limits:
+            memory: 500Mib
+            cpu: 10m
         ports:
         - containerPort: 7575
         livenessProbe:
