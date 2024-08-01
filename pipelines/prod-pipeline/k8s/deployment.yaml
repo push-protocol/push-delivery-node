@@ -108,5 +108,3 @@ spec:
                 key: REDIS_AUTH
           # Secrets End
       serviceAccountName: sa-apps
-      nodeSelector:
-        iam.gke.io/gke-metadata-server-enabled: 'true'
