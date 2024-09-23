@@ -14,9 +14,11 @@ export default class FeedsService {
         voip: boolean
     ) {
         if (!voip) {
-            return platform === config.platformEnum.web
-                ? utils.generateWebMessagingPayloadFromFeed(feed)
-                : utils.generateMobileMessagingPayloadFromFeed(feed)
+            return utils.generateWebMessagingPayloadFromFeed(feed)
+            // TODO: Fix this issue once the mobile app is deployed
+            // return platform === config.platformEnum.web
+            //     ? utils.generateWebMessagingPayloadFromFeed(feed)
+            //     : utils.generateMobileMessagingPayloadFromFeed(feed)
         } else {
             if (voip && platform == config.platformEnum.android)
                 return utils.generateAndrioidVideoCallPayloadFromFeed(feed)
