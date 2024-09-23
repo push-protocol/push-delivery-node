@@ -28,7 +28,7 @@ export default class FCMService {
         payload.tokens = tokens
         return admin
             .messaging()
-            .sendMulticast(payload)
+            .sendEachForMulticast(payload)
             .then((response) => {
                 logger.info('Successfully sent message: %o', response)
                 return response
