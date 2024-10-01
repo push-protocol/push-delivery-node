@@ -95,6 +95,11 @@ cd push-delivery-node
 npm start
 ```
 
+Or, you can build and start the server via docker-compose:
+
+```sh
+docker compose --profile prod --env-file .env up -d
+```
 
 
 ## Step-7: Device Registration
@@ -121,7 +126,7 @@ curl --location --request POST 'https://<delivery_node_url>/apis/v1/pushtokens/r
 
 ## Upcoming features
 
-- Dockerization
+- [x] Dockerization
 - Analytics
 - Video Tutorials
 - Monitoring APIs
