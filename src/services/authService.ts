@@ -71,7 +71,7 @@ export default class AuthService {
         try {
             const response = await delete_server_tokens(query, logger)
             if (response.success) {
-                logger.info('✅ Completed deleteExpiredServerTokens() ')
+                logger.info('✅ Completed deleteExpiredServerTokens()  ')
                 return { success: 1 }
             }
         } catch (err) {
