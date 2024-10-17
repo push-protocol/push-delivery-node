@@ -33,7 +33,7 @@ spec:
         livenessProbe:
           initialDelaySeconds: 60
           periodSeconds: 5
-          failureThreshold: 3
+          failureThreshold: 4
           httpGet:
             path: /apis/v1/pushtokens/register
             port: 7575
