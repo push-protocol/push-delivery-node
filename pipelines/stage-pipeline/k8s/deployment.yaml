@@ -23,10 +23,10 @@ spec:
         image: 'us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:init'
         resources:
           limits:
-            cpu: 300m
+            cpu: 700m
             memory: 300Mi
           requests:
-            cpu: 7m
+            cpu: 50m
             memory: 150Mi
         ports:
         - containerPort: 7575

@@ -7,5 +7,6 @@ COPY . .
 FROM node:16-alpine
 WORKDIR /app
 COPY --from=builder /app /app
+RUN npm install pm2 -g
 EXPOSE 7575
-CMD ["npm", "start"]
+CMD ["sh", "runner.sh"]
