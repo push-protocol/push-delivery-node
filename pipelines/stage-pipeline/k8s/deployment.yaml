@@ -23,14 +23,15 @@ spec:
         image: 'us-central1-docker.pkg.dev/push-stage-apps/ar-s-services-base-usce1/push-delivery-node-image:init'
         resources:
           limits:
-            cpu: 300m
-            memory: 300Mi
+            cpu: 700m
+            memory: 2000Mi
           requests:
             cpu: 7m
             memory: 150Mi
         ports:
         - containerPort: 7575
         livenessProbe:
+          timeoutSeconds: 30
           initialDelaySeconds: 60
           periodSeconds: 5
           failureThreshold: 3
@@ -38,6 +39,7 @@ spec:
             path: /apis/v1/pushtokens/register
             port: 7575
         readinessProbe:
+          timeoutSeconds: 30
           initialDelaySeconds: 60
           periodSeconds: 10
           failureThreshold: 3
