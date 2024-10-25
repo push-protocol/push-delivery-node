@@ -24,13 +24,14 @@ spec:
         resources:
           limits:
             cpu: 500m
-            memory: 300Mi
+            memory: 2000Mi
           requests:
             cpu: 50m
             memory: 150Mi
         ports:
         - containerPort: 7575
         livenessProbe:
+          timeoutSeconds: 30
           initialDelaySeconds: 60
           periodSeconds: 5
           failureThreshold: 3
@@ -38,6 +39,7 @@ spec:
             path: /apis/v1/pushtokens/register
             port: 7575
         readinessProbe:
+          timeoutSeconds: 30
           initialDelaySeconds: 60
           periodSeconds: 10
           failureThreshold: 3
