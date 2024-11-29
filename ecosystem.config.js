@@ -1,6 +1,6 @@
 module.exports = {
   apps : [{
-    name: "Push Delivery Staging",
+    name: "Push Delivery Node",
     script: "build/app.js",
     instances: "1",
     max_memory_restart: "2048M",

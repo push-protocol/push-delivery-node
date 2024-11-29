@@ -43,3 +43,4 @@ availableSecrets:
 options:
  logging: CLOUD_LOGGING_ONLY
  workerPool: 'projects/push-prod-apps/locations/us-central1/workerPools/worker-pool-p-services-base-usce1'
+

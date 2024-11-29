@@ -54,7 +54,9 @@ export default class FeedsService {
             }
             if (
                 feed.payload.data.additionalMeta &&
-                JSON.parse(feed.payload.data.additionalMeta.data).status == 4
+                feed.payload.data.additionalMeta.data &&
+                typeof feed.payload.data.additionalMeta.data === 'object' &&
+                JSON.parse(feed.payload.data.additionalMeta.data).status === 4
             ) {
                 logger.info('Cancel video call feed sid:: %o ', feed.sid)
                 return
@@ -63,13 +65,15 @@ export default class FeedsService {
             const deviceTokensMeta = await pushTokens.getDeviceTokens(
                 feed.users,
                 feed.payload.data.additionalMeta &&
-                    JSON.parse(feed.payload.data.additionalMeta.data).status ==
+                    feed.payload.data.additionalMeta.data &&
+                    typeof feed.payload.data.additionalMeta.data === 'object' &&
+                    JSON.parse(feed.payload.data.additionalMeta.data).status ===
                         1
             )
             let devices = deviceTokensMeta.devices
             if (devices.length == 0) {
                 logger.info(
-                    'The feed has no appropriate device id mappings for the given addresses, hence skipping the feed with sid :: %o ',
+                    'The feed has no appropriate device id mappings for the given addresses, hence  skipping the feed with sid :: %o ',
                     feed.sid
                 )
                 return
