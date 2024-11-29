@@ -21,6 +21,10 @@ const FEED_REQUEST_PAGE_SIZE = 50
 const RECONNECTION_DELAY_MAX = 10000
 export default async () => {
     // More Details: https://socket.io/docs/v4/client-options/#reconnectiondelay
+    logger.info(
+        'config.PUSH_NODE_WEBSOCKET_URL ',
+        config.PUSH_NODE_WEBSOCKET_URL
+    )
     const socket = io.connect(config.PUSH_NODE_WEBSOCKET_URL, {
         reconnectionDelayMax: RECONNECTION_DELAY_MAX,
         reconnectionDelay: 5000,
