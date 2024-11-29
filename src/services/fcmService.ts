@@ -56,7 +56,7 @@ export default class FCMService {
                 }
             })
             .catch((error) => {
-                logger.error('Error sending message: %o', error)
+                logger.error('Error sending message : %o', error)
                 return error
             })
     }

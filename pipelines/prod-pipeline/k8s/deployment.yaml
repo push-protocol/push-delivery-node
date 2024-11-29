@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: 'Deployment'
+metadata:
+  name: 'push-delivery-node'
+  namespace: 'apps'
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: 'push-delivery-node'
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+  template:
+    metadata:
+      labels:
+        app: 'push-delivery-node'
+    spec:
+      nodeSelector:
+        cloud.google.com/gke-nodepool: np-p-services-base-usce1-01
+      containers:
+      - name: 'push-delivery-node'
+        image: 'us-central1-docker.pkg.dev/push-prod-apps/ar-p-services-base-usce1/push-delivery-node-image:init'
+        resources:
+          limits:
+            cpu: 2500m
+            memory: 4500Mi
+          requests:
+            cpu: 2000m
+            memory: 4000Mi
+        ports:
+        - containerPort: 7575
+        livenessProbe:
+          timeoutSeconds: 30
+          initialDelaySeconds: 60
+          periodSeconds: 5
+          failureThreshold: 3
+          httpGet:
+            path: /apis/v1/pushtokens/register
+            port: 7575
+        readinessProbe:
+          timeoutSeconds: 30
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          failureThreshold: 3
+          successThreshold: 4
+          httpGet:
+            path: /apis/v1/pushtokens/register
+            port: 7575
+        env:
+          # Config Maps Start
+          - name: DELIVERY_NODES_NET
+            valueFrom:
+              configMapKeyRef:
+                name: delivery-apps-configmap
+                key: DELIVERY_NODES_NET
+          - name: REDIS_URL
+            valueFrom:
+              configMapKeyRef:
+                name: delivery-apps-configmap
+                key: REDIS_URL
+          - name: DELIVERY_NODE_DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: delivery-apps-configmap
+                key: DELIVERY_NODE_DB_HOST
+          - name: DELIVERY_NODE_DB_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: delivery-apps-configmap
+                key: DELIVERY_NODE_DB_PORT
+          - name: LOG_LEVEL
+            valueFrom:
+              configMapKeyRef:
+                name: delivery-apps-configmap
+                key: LOG_LEVEL
+          # Config Maps End
+          # Secrets Start
+          - name: DELIVERY_NODE_DB_NAME
+            valueFrom:
+              secretKeyRef:
+                name: delivery-apps-secret
+                key: DELIVERY_NODE_DB_NAME
+          - name: DELIVERY_NODE_DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: delivery-apps-secret
+                key: DELIVERY_NODE_DB_USER
+          - name: DELIVERY_NODE_DB_PASS
+            valueFrom:
+              secretKeyRef:
+                name: delivery-apps-secret
+                key: DELIVERY_NODE_DB_PASS
+          - name: DELIVERY_NODE_APN_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: delivery-apps-secret
+                key: DELIVERY_NODE_APN_KEY_ID
+          - name: DELIVERY_NODE_APN_TEAM_ID
+            valueFrom:
+              secretKeyRef:
+                name: delivery-apps-secret
+                key: DELIVERY_NODE_APN_TEAM_ID
+          - name: REDIS_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: delivery-apps-secret
+                key: REDIS_AUTH
+          # Secrets End
+      serviceAccountName: sa-apps

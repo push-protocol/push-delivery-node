@@ -73,7 +73,7 @@ export default class FeedsService {
             let devices = deviceTokensMeta.devices
             if (devices.length == 0) {
                 logger.info(
-                    'The feed has no appropriate device id mappings for the given addresses, hence skipping the feed with sid :: %o ',
+                    'The feed has no appropriate device id mappings for the given addresses, hence  skipping the feed with sid :: %o ',
                     feed.sid
                 )
                 return

@@ -71,7 +71,7 @@
     "@types/node": "^18.0.5",
     "@typescript-eslint/eslint-plugin": "^5.30.6",
     "@typescript-eslint/parser": "^5.30.6",
-    "nodemon": "^2.0.19",
+    "nodemon": "^3.1.7",
     "ts-node": "^10.9.1"
   }
 }
