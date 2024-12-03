@@ -184,10 +184,10 @@ module.exports = {
                         ? 'high'
                         : 'normal',
                 notification: {
-                    icon: '@drawable/ic_stat_name',
+                    icon: 'ic_notification',
                     color: '#e20880',
                     default_vibrate_timings: 'true',
-                    image: feedPayload.data.icon,
+                    image: feedPayload.data.aimg,
                 },
             },
         }
