@@ -8,6 +8,25 @@ var utils = require('../helpers/utilsHelper')
 
 @Service()
 export default class FeedsService {
+    generateDataObject(feed) {
+        if (feed.payload.data.type === 4) {
+            return {} // Return an empty object for type 4
+        }
+
+        return {
+            type: 'PUSH_NOTIFICATION_CHANNEL',
+            details: JSON.stringify( {
+                subType: feed.is_spam ? 'SPAM' : 'INBOX',
+                info: {
+                    icon: feed.payload.data.icon || '',
+                    app: feed.payload.data.app || '',
+                    image: feed.payload.data.aimg || '',
+                },
+            }),
+        }
+    }
+
+
     private generateMessageBasedOnPlatformAndType(
         feed: any,
         platform: string,
@@ -85,6 +104,10 @@ export default class FeedsService {
                 deviceTokensMeta.platform,
                 deviceTokensMeta.voip
             )
+          
+            const data = this.generateDataObject(feed)
+            msgPayload.data = data
+
             // to keep track of the pltform and voip status
             msgPayload.platform = deviceTokensMeta.platform
             msgPayload.voip = deviceTokensMeta.voip
