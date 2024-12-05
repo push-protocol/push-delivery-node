@@ -182,23 +182,30 @@ export default class PushMessageService {
             let fcmResponse = {}
             const fcm = Container.get(FCMService)
             const payload = JSON.parse(row.payload)
+            console.log('s-1')
             try {
-                if (payload.voip && payload.platform == config.platformEnum.ios) {
+                if (
+                    payload.voip &&
+                    payload.platform == config.platformEnum.ios
+                ) {
                     fcmResponse = await fcm.sendVoIPNotificationToIOS(
                         JSON.parse(row.tokens),
                         JSON.parse(row.payload)
                     )
+                    console.log('s-2')
                 } else {
                     fcmResponse = await fcm.sendMessageToMultipleRecipient(
                         JSON.parse(row.tokens),
                         JSON.parse(row.payload)
                     )
+                    console.log('s-3')
                 }
             } catch (e) {
                 valid = false
                 logger.error(e)
                 err = e
             }
+                    console.log('s-4', valid)
 
             // Check and remove failed tokens
             if (valid) {
