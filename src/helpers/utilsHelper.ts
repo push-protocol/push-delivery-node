@@ -87,6 +87,7 @@ module.exports = {
                     aps: {
                         'content-available': 1,
                         'mutable-content': 1,
+                        'sound': 'default',
                         category: 'withappicon',
                     },
                 },
@@ -163,6 +164,7 @@ module.exports = {
                     aps: {
                         'content-available': 1,
                         'mutable-content': 1,
+                        'sound': 'default',
                         category: 'withappicon',
                     },
                 },
