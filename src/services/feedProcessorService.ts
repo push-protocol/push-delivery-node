@@ -1,31 +1,166 @@
 import { Service, Container } from 'typedi'
 import config from '../config'
 import logger from '../loaders/logger'
-
+import * as PushNodeUtils from '../utils/pushNodeUtils'
 import PushTokensService from './pushTokensService'
 import PushMessageService from './pushMessageService'
+import * as StringUtil from '../utils/stringUtil'
+import { verifyPayloadSize } from '../utils/commonUtils'
 var utils = require('../helpers/utilsHelper')
 
 @Service()
 export default class FeedsService {
-    generateDataObject(feed) {
+    async generateDataObject(feed) {
         if (feed.payload.data.type === 4) {
-            return {} // Return an empty object for type 4
+            return {}
+        }
+
+        if (feed.payload.data.app === 'Push Chat') {
+            const verificationProof = feed.payload.verificationProof
+            const chatIdMatch = verificationProof.match(
+                /:internal:([a-f0-9]{64})/
+            )
+
+            let chatId = null
+            if (chatIdMatch && chatIdMatch[1]) {
+                chatId = chatIdMatch[1]
+                console.log('Extracted chatId:', chatId)
+            } else {
+                console.error(
+                    'Failed to extract chatId from verificationProof:',
+                    verificationProof
+                )
+                return {} // Ignore and return an empty object
+            }
+
+            if (!chatId) {
+                console.error('chatId could not be extracted')
+                return {}
+            }
+
+            // let url = config.PUSH_NODE_WEBSOCKET_URL
+            // const requestUrl = `${url}/apis/v1/chat/${chatId}/address/${feed.sender}`
+            // const threadHashUrl = `${url}/apis/v1/chat/users/${feed.sender}/conversations/${chatId}/hash`
+
+            let threadHash
+
+            try {
+                // const threadHashResponse = await axios.get(threadHashUrl)
+                const threadHashResponse = await PushNodeUtils.getThreadHashUrl(
+                    feed.sender,
+                    chatId
+                )
+                threadHash = threadHashResponse.data.threadHash || ''
+            } catch (error) {
+                console.error('Error while calling the ThreadHash API:', error)
+            }
+
+            let msg = null
+            if (threadHash) {
+                try {
+                    // const msgUrl = `${url}/apis/v1/chat/conversationhash/${threadHash}?fetchLimit=1`
+                    // const msgResponse = await axios.get(msgUrl)
+                    const msgResponse = await PushNodeUtils.messageUrl(
+                        threadHash
+                    )
+                    if (
+                        Array.isArray(msgResponse.data) &&
+                        msgResponse.data.length > 0
+                    ) {
+                        msg = msgResponse.data[0]
+                    }
+                } catch (error) {
+                    console.error('Error while calling the Message API:', error)
+                }
+            }
+
+            try {
+                // const response = await axios.get(requestUrl)
+                const response = await PushNodeUtils.getChatUserInfo(
+                    chatId,
+                    feed.sender
+                )
+                const meta = response.data.meta
+
+                const subType = meta.group ? 'GROUP_CHAT' : 'INDIVIDUAL_CHAT'
+                const userInfo = await PushNodeUtils.getUserInfo(feed.sender)
+                if (subType === 'INDIVIDUAL_CHAT') {
+                    return {
+                        // check if the user's profile picture is bigger than 4kb
+
+                        type: 'PUSH_NOTIFICATION_CHAT',
+                        details: {
+                            subType,
+                            info: {
+                                wallets: feed.sender,
+                                profilePicture:
+                                    userInfo.data.profile.picture ?? '',
+                                chatId,
+                                threadhash: threadHash,
+                            },
+                        },
+                        messageBody: {
+                            title: StringUtil.getTrimmedAddress(feed.sender),
+                            body: StringUtil.getGenericMessage(msg?.type?? null),
+                        },
+                    }
+                } else if (subType === 'GROUP_CHAT') {
+                    let groupInfo = null
+                    if (meta.group) {
+                        try {
+                            // const groupInfoUrl = `${url}/apis/v2/chat/groups/${chatId}`
+                            // const groupInfoResponse = await axios.get(groupInfoUrl)
+                            const groupInfoResponse =
+                                await PushNodeUtils.getGroupInfo(chatId)
+                            groupInfo = {
+                                groupName: groupInfoResponse.data.groupName,
+                                groupImage: groupInfoResponse.data.groupImage,
+                            }
+                        } catch (error) {
+                            console.error(
+                                'Error while calling the Group Info API:',
+                                error
+                            )
+                        }
+                    }
+                    return {
+                        type: 'PUSH_NOTIFICATION_CHAT',
+                        details: {
+                            subType,
+                            info: {
+                                wallets: feed.sender,
+                                profilePicture:
+                                    userInfo.data.profile.picture ?? '',
+                                chatId,
+                                threadhash: threadHash,
+                            },
+                        },
+                        messageBody: {
+                            title: groupInfo.groupName ?? '',
+                            body: `${StringUtil.getTrimmedAddress(
+                                feed.sender
+                            )} : ${StringUtil.getGenericMessage(msg?.type?? null)}`,
+                        },
+                    }
+                }
+            } catch (error) {
+                console.error('Error while calling the API:', error)
+                return {}
+            }
         }
 
         return {
             type: 'PUSH_NOTIFICATION_CHANNEL',
-            details: JSON.stringify( {
+            details: {
                 subType: feed.is_spam ? 'SPAM' : 'INBOX',
                 info: {
                     icon: feed.payload.data.icon || '',
                     app: feed.payload.data.app || '',
                     image: feed.payload.data.aimg || '',
                 },
-            }),
+            },
         }
     }
-
 
     private generateMessageBasedOnPlatformAndType(
         feed: any,
@@ -104,10 +239,31 @@ export default class FeedsService {
                 deviceTokensMeta.platform,
                 deviceTokensMeta.voip
             )
-          
-            const data = this.generateDataObject(feed)
-            msgPayload.data = data
 
+            const data = await this.generateDataObject(feed)
+            msgPayload.notification.title =
+                data?.messageBody?.title ?? msgPayload.notification.title
+            msgPayload.notification.body =
+                data?.messageBody?.body ?? msgPayload.notification.body
+            delete data.messageBody
+            msgPayload.data = data
+            // check for the whole payload size
+            const isValidPayloadSize = verifyPayloadSize(
+                JSON.stringify(msgPayload)
+            )
+            if (!isValidPayloadSize && msgPayload.data.tyepe === 'PUSH_NOTIFICATION_CHAT') {
+                // remove the images from the payload
+                msgPayload.apns.fcm_options.image = ''
+                // if still greater than 4kb
+                if (!verifyPayloadSize(JSON.stringify(msgPayload))) {
+                    msgPayload.data.details.info.profilePicture = ''
+                    // just for debugging the payload size after emoving images
+                    verifyPayloadSize(JSON.stringify(msgPayload))
+                    
+                }
+            }
+            msgPayload.data.details = JSON.stringify( msgPayload.data.details)
+            console.log('msgPayload:', msgPayload)
             // to keep track of the pltform and voip status
             msgPayload.platform = deviceTokensMeta.platform
             msgPayload.voip = deviceTokensMeta.voip
