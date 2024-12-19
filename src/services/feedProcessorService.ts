@@ -101,7 +101,9 @@ export default class FeedsService {
                         },
                         messageBody: {
                             title: StringUtil.getTrimmedAddress(feed.sender),
-                            body: StringUtil.getGenericMessage(msg?.type?? null),
+                            body: StringUtil.getGenericMessage(
+                                msg?.messageType ?? null
+                            ),
                         },
                     }
                 } else if (subType === 'GROUP_CHAT') {
@@ -139,7 +141,9 @@ export default class FeedsService {
                             title: groupInfo.groupName ?? '',
                             body: `${StringUtil.getTrimmedAddress(
                                 feed.sender
-                            )} : ${StringUtil.getGenericMessage(msg?.type?? null)}`,
+                            )} : ${StringUtil.getGenericMessage(
+                                msg?.messageType ?? null
+                            )}`,
                         },
                     }
                 }
@@ -251,7 +255,10 @@ export default class FeedsService {
             const isValidPayloadSize = verifyPayloadSize(
                 JSON.stringify(msgPayload)
             )
-            if (!isValidPayloadSize && msgPayload.data.tyepe === 'PUSH_NOTIFICATION_CHAT') {
+            if (
+                !isValidPayloadSize &&
+                msgPayload.data.tyepe === 'PUSH_NOTIFICATION_CHAT'
+            ) {
                 // remove the images from the payload
                 msgPayload.apns.fcm_options.image = ''
                 // if still greater than 4kb
@@ -259,10 +266,9 @@ export default class FeedsService {
                     msgPayload.data.details.info.profilePicture = ''
                     // just for debugging the payload size after emoving images
                     verifyPayloadSize(JSON.stringify(msgPayload))
-                    
                 }
             }
-            msgPayload.data.details = JSON.stringify( msgPayload.data.details)
+            msgPayload.data.details = JSON.stringify(msgPayload.data.details)
             console.log('msgPayload:', msgPayload)
             // to keep track of the pltform and voip status
             msgPayload.platform = deviceTokensMeta.platform
