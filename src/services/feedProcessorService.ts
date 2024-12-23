@@ -102,7 +102,7 @@ export default class FeedsService {
                         messageBody: {
                             title: StringUtil.getTrimmedAddress(feed.sender),
                             body: StringUtil.getGenericMessage(
-                                msg?.messageType ?? null
+                                msg?.messageType
                             ),
                         },
                     }
@@ -142,7 +142,7 @@ export default class FeedsService {
                             body: `${StringUtil.getTrimmedAddress(
                                 feed.sender
                             )} : ${StringUtil.getGenericMessage(
-                                msg?.messageType ?? null
+                                msg?.messageType
                             )}`,
                         },
                     }
@@ -246,9 +246,9 @@ export default class FeedsService {
 
             const data = await this.generateDataObject(feed)
             msgPayload.notification.title =
-                data?.messageBody?.title ?? msgPayload.notification.title
+                data?.messageBody?.title ?? StringUtil.getTrimmedAddress(feed.sender)
             msgPayload.notification.body =
-                data?.messageBody?.body ?? msgPayload.notification.body
+                data?.messageBody?.body ??  StringUtil.getGenericMessage(null)
             delete data.messageBody
             msgPayload.data = data
             // check for the whole payload size
