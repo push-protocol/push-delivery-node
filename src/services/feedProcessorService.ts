@@ -246,9 +246,9 @@ export default class FeedsService {
 
             const data = await this.generateDataObject(feed)
             msgPayload.notification.title =
-                data?.messageBody?.title ?? StringUtil.getTrimmedAddress(feed.sender)
+                data?.messageBody?.title ?? msgPayload.notification.title
             msgPayload.notification.body =
-                data?.messageBody?.body ??  StringUtil.getGenericMessage(null)
+                data?.messageBody?.body ?? msgPayload.notification.body
             delete data.messageBody
             msgPayload.data = data
             // check for the whole payload size
