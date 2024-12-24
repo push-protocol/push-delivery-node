@@ -1,4 +1,4 @@
-# Push Delivery Node 
+# Push Delivery Node
 
 The Push Delivery Node is a service that facilitates push notifications for third-party customers, hackers and apps. It can be hosted separately and receives notifications from the push node.
 
