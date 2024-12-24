@@ -14,7 +14,7 @@ export default class FeedsService {
     async generateDataObject(feed) {
         const defaultNotification = {
             type: 'PUSH_NOTIFICATION_CHAT',
-            details: null,
+            details: JSON.stringify({}),
             messageBody: {
                 title: StringUtil.getTrimmedAddress(feed.sender),
                 body: StringUtil.getGenericMessage(null),
