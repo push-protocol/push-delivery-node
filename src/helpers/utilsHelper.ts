@@ -98,9 +98,9 @@ module.exports = {
                             ? '10'
                             : '5', // Set the priority to high
                 },
-                fcm_options: {
-                    image: feedPayload.data.icon,
-                },
+                // fcm_options: {
+                //     image: feedPayload.data.icon,
+                // },
             },
             android: {
                 priority:
@@ -175,9 +175,9 @@ module.exports = {
                             ? '10'
                             : '5', // Set the priority to high
                 },
-                fcm_options: {
-                    image: feedPayload.data.icon,
-                },
+                // fcm_options: {
+                //     image: feedPayload.data.icon,
+                // },
             },
             android: {
                 priority:
