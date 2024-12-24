@@ -10,119 +10,100 @@ var utils = require('../helpers/utilsHelper')
 
 @Service()
 export default class FeedsService {
+
     async generateDataObject(feed) {
+        const defaultNotification = {
+            type: 'PUSH_NOTIFICATION_CHAT',
+            details: null,
+            messageBody: {
+                title: StringUtil.getTrimmedAddress(feed.sender),
+                body: StringUtil.getGenericMessage(null),
+            },
+        };
+    
+        // Return default notification for type 4
         if (feed.payload.data.type === 4) {
-            return {}
+            return defaultNotification;
         }
-
+    
         if (feed.payload.data.app === 'Push Chat') {
-            const verificationProof = feed.payload.verificationProof
-            const chatIdMatch = verificationProof.match(
-                /:internal:([a-f0-9]{64})/
-            )
-
-            let chatId = null
+            const verificationProof = feed.payload.verificationProof;
+            const chatIdMatch = verificationProof.match(/:internal:([a-f0-9]{64})/);
+    
+            let chatId = null;
             if (chatIdMatch && chatIdMatch[1]) {
-                chatId = chatIdMatch[1]
-                console.log('Extracted chatId:', chatId)
+                chatId = chatIdMatch[1];
+                console.log('Extracted chatId:', chatId);
             } else {
-                console.error(
-                    'Failed to extract chatId from verificationProof:',
-                    verificationProof
-                )
-                return {} // Ignore and return an empty object
+                console.error('Failed to extract chatId from verificationProof:', verificationProof);
+                return defaultNotification;
             }
-
+    
             if (!chatId) {
-                console.error('chatId could not be extracted')
-                return {}
+                console.error('chatId could not be extracted');
+                return defaultNotification;
             }
-
-            // let url = config.PUSH_NODE_WEBSOCKET_URL
-            // const requestUrl = `${url}/apis/v1/chat/${chatId}/address/${feed.sender}`
-            // const threadHashUrl = `${url}/apis/v1/chat/users/${feed.sender}/conversations/${chatId}/hash`
-
-            let threadHash
-
+    
+            let threadHash;
             try {
-                // const threadHashResponse = await axios.get(threadHashUrl)
-                const threadHashResponse = await PushNodeUtils.getThreadHashUrl(
-                    feed.sender,
-                    chatId
-                )
-                threadHash = threadHashResponse.data.threadHash || ''
+                const threadHashResponse = await PushNodeUtils.getThreadHashUrl(feed.sender, chatId);
+                threadHash = threadHashResponse.data.threadHash || '';
             } catch (error) {
-                console.error('Error while calling the ThreadHash API:', error)
+                console.error('Error while calling the ThreadHash API:', error);
+                return defaultNotification;
             }
-
-            let msg = null
+    
+            let msg = null;
             if (threadHash) {
                 try {
-                    // const msgUrl = `${url}/apis/v1/chat/conversationhash/${threadHash}?fetchLimit=1`
-                    // const msgResponse = await axios.get(msgUrl)
-                    const msgResponse = await PushNodeUtils.messageUrl(
-                        threadHash
-                    )
-                    if (
-                        Array.isArray(msgResponse.data) &&
-                        msgResponse.data.length > 0
-                    ) {
-                        msg = msgResponse.data[0]
+                    const msgResponse = await PushNodeUtils.messageUrl(threadHash);
+                    if (Array.isArray(msgResponse.data) && msgResponse.data.length > 0) {
+                        msg = msgResponse.data[0];
                     }
                 } catch (error) {
-                    console.error('Error while calling the Message API:', error)
+                    console.error('Error while calling the Message API:', error);
+                    return defaultNotification;
                 }
+            } else {
+                return defaultNotification;
             }
-
+    
             try {
-                // const response = await axios.get(requestUrl)
-                const response = await PushNodeUtils.getChatUserInfo(
-                    chatId,
-                    feed.sender
-                )
-                const meta = response.data.meta
-
-                const subType = meta.group ? 'GROUP_CHAT' : 'INDIVIDUAL_CHAT'
-                const userInfo = await PushNodeUtils.getUserInfo(feed.sender)
+                const response = await PushNodeUtils.getChatUserInfo(chatId, feed.sender);
+                const meta = response.data.meta;
+    
+                const subType = meta.group ? 'GROUP_CHAT' : 'INDIVIDUAL_CHAT';
+                const userInfo = await PushNodeUtils.getUserInfo(feed.sender);
+    
                 if (subType === 'INDIVIDUAL_CHAT') {
                     return {
-                        // check if the user's profile picture is bigger than 4kb
-
                         type: 'PUSH_NOTIFICATION_CHAT',
                         details: {
                             subType,
                             info: {
                                 wallets: feed.sender,
-                                profilePicture:
-                                    userInfo.data.profile.picture ?? '',
+                                profilePicture: userInfo.data.profile.picture ?? '',
                                 chatId,
                                 threadhash: threadHash,
                             },
                         },
                         messageBody: {
                             title: StringUtil.getTrimmedAddress(feed.sender),
-                            body: StringUtil.getGenericMessage(
-                                msg?.messageType
-                            ),
+                            body: StringUtil.getGenericMessage(msg?.messageType),
                         },
-                    }
+                    };
                 } else if (subType === 'GROUP_CHAT') {
-                    let groupInfo = null
+                    let groupInfo = null;
                     if (meta.group) {
                         try {
-                            // const groupInfoUrl = `${url}/apis/v2/chat/groups/${chatId}`
-                            // const groupInfoResponse = await axios.get(groupInfoUrl)
-                            const groupInfoResponse =
-                                await PushNodeUtils.getGroupInfo(chatId)
+                            const groupInfoResponse = await PushNodeUtils.getGroupInfo(chatId);
                             groupInfo = {
                                 groupName: groupInfoResponse.data.groupName,
                                 groupImage: groupInfoResponse.data.groupImage,
-                            }
+                            };
                         } catch (error) {
-                            console.error(
-                                'Error while calling the Group Info API:',
-                                error
-                            )
+                            console.error('Error while calling the Group Info API:', error);
+                            return defaultNotification;
                         }
                     }
                     return {
@@ -131,28 +112,23 @@ export default class FeedsService {
                             subType,
                             info: {
                                 wallets: feed.sender,
-                                profilePicture:
-                                    userInfo.data.profile.picture ?? '',
+                                profilePicture: userInfo.data.profile.picture ?? '',
                                 chatId,
                                 threadhash: threadHash,
                             },
                         },
                         messageBody: {
                             title: groupInfo.groupName ?? '',
-                            body: `${StringUtil.getTrimmedAddress(
-                                feed.sender
-                            )} : ${StringUtil.getGenericMessage(
-                                msg?.messageType
-                            )}`,
+                            body: `${StringUtil.getTrimmedAddress(feed.sender)} : ${StringUtil.getGenericMessage(msg?.messageType)}`,
                         },
-                    }
+                    };
                 }
             } catch (error) {
-                console.error('Error while calling the API:', error)
-                return {}
+                console.error('Error while calling the API:', error);
+                return defaultNotification;
             }
         }
-
+    
         return {
             type: 'PUSH_NOTIFICATION_CHANNEL',
             details: {
@@ -163,7 +139,7 @@ export default class FeedsService {
                     image: feed.payload.data.aimg || '',
                 },
             },
-        }
+        };
     }
 
     private generateMessageBasedOnPlatformAndType(
@@ -260,7 +236,7 @@ export default class FeedsService {
                 msgPayload.data.tyepe === 'PUSH_NOTIFICATION_CHAT'
             ) {
                 // remove the images from the payload
-                msgPayload.apns.fcm_options.image = ''
+                // msgPayload.apns.fcm_options.image = ''
                 // if still greater than 4kb
                 if (!verifyPayloadSize(JSON.stringify(msgPayload))) {
                     msgPayload.data.details.info.profilePicture = ''
